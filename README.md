@@ -24,3 +24,16 @@ docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml -d up homeassis
 
 
 docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml -d up outsidetemp
+
+
+
+curl http://localhost:5002/thermostat/ecobee/resource/runtime?format=influx
+
+curl http://localhost:5002/thermostat/ecobee/resource/extended-runtime?format=influx
+
+curl http://localhost:5001/conditions/Brossard?format=dropwizard
+curl http://localhost:5001/conditions/Brossard?format=influx
+
+
+
+
