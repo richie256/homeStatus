@@ -1,7 +1,6 @@
 FROM python:3-onbuild
 COPY requirements.txt /usr/src/app/requirements.txt
 WORKDIR /usr/src/app
-# RUN pip install -r requirements.txt
 RUN pip3 install --trusted-host pypi.python.org -r requirements.txt
 COPY . /usr/src/app
-CMD ["python", "api.py"]
+CMD ["python", "outsidetemp_api.py"]

@@ -119,7 +119,7 @@ class OutsideTemp(Resource):
  
             #Python 3.4:
             wunderground = None
-            wunderground = urlopen('http://api.wunderground.com/api/ec726c3291dc6437/conditions/astronomy/hourly/q/Canada/Brossard.json')
+            wunderground = urlopen('http://api.wunderground.com/api/' + FIXME_WUNDERGROUND_API_KEY + '/conditions/astronomy/hourly/q/Canada/Brossard.json')
             #charset = wunderground.info().get_param('charset', 'utf8')
             #data = wunderground.read()
             #parsed_json = json.loads(data.decode(charset))

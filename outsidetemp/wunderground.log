@@ -1,0 +1,2 @@
+2019-12-17 03:14:34,530 - wunderground_application - ERROR - Problem with getting outside infos in JSON. wunderground is None.
+2019-12-17 03:14:34,531 - wunderground_application - ERROR - <class 'urllib.error.HTTPError'>

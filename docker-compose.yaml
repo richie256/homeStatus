@@ -57,8 +57,8 @@ services:
     volumes:
       - influx:/var/lib/influxdb
     environment:
-      #INFLUXDB_ADMIN_USER: "FIX_ME"
-      #INFLUXDB_ADMIN_PASSWORD: "FIX_ME"
+      INFLUXDB_ADMIN_USER: "FIX_ME"
+      INFLUXDB_ADMIN_PASSWORD: "FIX_ME"
       # - INFLUXDB_USER: 
       # - INFLUXDB_USER_PASSWORD: 
     ports:
