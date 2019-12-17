@@ -12,6 +12,7 @@ Incorporate Ultrasonic distance.
 # MQTT
 Configure the MQTT
 
+<<<<<<< HEAD
 # Explore .local hosts
 
 # API Wunderground
