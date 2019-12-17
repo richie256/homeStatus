@@ -1,4 +1,4 @@
-# OutsideTemp service
+# Ecobee service
 
 import pyecobee
 
@@ -10,9 +10,9 @@ from flask import request
 import requests
 import os
 import json
-from datetime import datetime
-import calendar
-import pytz
+#from datetime import datetime
+#import calendar
+#import pytz
 
 from requests.exceptions import RequestException;
 
@@ -24,6 +24,13 @@ import inspect
 
 from dateutil import tz
 
+from .const import (
+    JSON,
+    INFLUX,
+    ECOBEE_DATETIME_FORMAT,
+)
+
+from .util import toFarenheit, toCelsius, ts_utc_from_datestr
 
 # create logger with 'ecobee_application'
 logger = logging.getLogger('ecobee_application')
@@ -70,9 +77,9 @@ def config_from_file(filename, config=None):
 
 class Ecobee(object):
     ''' Class for storing Ecobee Thermostats and Sensors '''
-    CONST_JSON = 'JSON'
-    CONST_INFLUX = 'influx'
-    CONST_DROPWIZARD = 'dropwizard'
+    #CONST_JSON = 'JSON'
+    #CONST_INFLUX = 'influx'
+    #CONST_DROPWIZARD = 'dropwizard'
 
     def __init__(self, config_filename=None, api_key=None, config=None):
         self.thermostats = list()
@@ -673,44 +680,44 @@ class Ecobee(object):
 
 
 
-    @staticmethod
-    def ts_utc_from_datestr(utc_date_str):
-        utc = datetime.strptime(utc_date_str, '%Y-%m-%d %H:%M:%S')
+#    @staticmethod
+#    def ts_utc_from_datestr(utc_date_str):
+#        utc = datetime.strptime(utc_date_str, '%Y-%m-%d %H:%M:%S')
+#
+#        pst = pytz.timezone('Etc/UTC')
+#        utc = pst.localize(utc)
+#
+#        # return calendar.timegm(dt.utctimetuple())
+#        return utc.timestamp()
 
-        pst = pytz.timezone('Etc/UTC')
-        utc = pst.localize(utc)
-
-        # return calendar.timegm(dt.utctimetuple())
-        return utc.timestamp()
 
 
+#    @staticmethod
+#    def ts_from_datestr(utc_date_str):
+#        """Retunns a UNIX timestamp in seconds from a string in the format
+#        YYYY-MM-DD HH:MM:SS, where the string is a UTC date/time.
+#        """
 
-    @staticmethod
-    def ts_from_datestr(utc_date_str):
-        """Retunns a UNIX timestamp in seconds from a string in the format
-        YYYY-MM-DD HH:MM:SS, where the string is a UTC date/time.
-        """
+#        # UTC timestamp
+#        # Auto-detect zones:
+#        # from_zone = tz.tzutc()
+#        # to_zone = tz.tzlocal()
+#        from_zone = tz.tzlocal()
+#        to_zone = tz.tzutc()
 
-        # UTC timestamp
-        # Auto-detect zones:
-        # from_zone = tz.tzutc()
-        # to_zone = tz.tzlocal()
-        from_zone = tz.tzlocal()
-        to_zone = tz.tzutc()
+#        # utc = datetime.strptime('2011-01-21 02:37:21', '%Y-%m-%d %H:%M:%S')
+#        utc = datetime.strptime(utc_date_str, ECOBEE_DATETIME_FORMAT)
+#        # dt = datetime.strptime(utc_date_str, '%Y-%m-%d %H:%M:%S')
 
-        # utc = datetime.strptime('2011-01-21 02:37:21', '%Y-%m-%d %H:%M:%S')
-        utc = datetime.strptime(utc_date_str, '%Y-%m-%d %H:%M:%S')
-        # dt = datetime.strptime(utc_date_str, '%Y-%m-%d %H:%M:%S')
+#        # Tell the datetime object that it's in UTC time zone since
+#        # datetime objects are 'naive' by default
+#        utc = utc.replace(tzinfo=from_zone)
 
-        # Tell the datetime object that it's in UTC time zone since 
-        # datetime objects are 'naive' by default
-        utc = utc.replace(tzinfo=from_zone)
+#        # Convert time zone
+#        local_dt = utc.astimezone(to_zone)
 
-        # Convert time zone
-        local_dt = utc.astimezone(to_zone)
-
-        # return calendar.timegm(dt.timetuple())
-        return calendar.timegm(local_dt.timetuple())
+#        # return calendar.timegm(dt.timetuple())
+#        return calendar.timegm(local_dt.timetuple())
 
 
 
@@ -729,13 +736,13 @@ class Ecobee(object):
             return 5
         return -1
 
-    @staticmethod
-    def toFarenheit(celsius):
-        return (9.0/5.0) * celsius + 32
+#    @staticmethod
+#    def toFarenheit(celsius):
+#        return (9.0/5.0) * celsius + 32
 
-    @staticmethod
-    def toCelsius(farenheit):
-        return (farenheit - 32) * (5.0 / 9.0)
+#    @staticmethod
+#    def toCelsius(farenheit):
+#        return (farenheit - 32) * (5.0 / 9.0)
 
 
 
@@ -747,7 +754,6 @@ class ExtendedRuntimeClass(Resource):
 
         return thermostat.getExtendedRuntime(0)
         # return jsonify(thermostat.get_thermostat(0))
-
 
 class RuntimeClass(Resource):
     def get(self):
@@ -766,13 +772,6 @@ class EcobeeThermostatRequestPin(Resource):
         thermostat = Ecobee('ecobee.conf')
         thermostat.request_pin()
 
-# thermostat = ecobee.get_thermostats()
-
-# blbfbotAxTwKs7jBYSQIVEAovlrkJZeC
-# http://localhost:5002/thermostat/ecobee/resource/extended-runtime?format=influx
-
-# api.add_resource(OutsideTemp, '/conditions/<string:location>')
-# api.add_resource(ecobeeThermostat, '/thermostat/ecobee/resource/extended-runtime')
 api.add_resource(ExtendedRuntimeClass, '/thermostat/ecobee/resource/extended-runtime')
 api.add_resource(RuntimeClass, '/thermostat/ecobee/resource/runtime')
 
@@ -782,3 +781,6 @@ api.add_resource(EcobeeThermostatRequestPin, '/thermostat/ecobee/pin/request')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
+
+
+
