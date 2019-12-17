@@ -1,0 +1,103 @@
+version: '3.1'
+
+services:
+  outsidetemp-service:
+    build: ./outsidetemp
+    volumes:
+      - ./outsidetemp:/usr/src/app
+    ports:
+      - 5001:80
+
+  ecobee-service:
+    build: ./ecobeeapi
+    volumes:
+      - ./ecobeeapi:/usr/src/app
+    ports:
+      - 5002:80
+
+  #videocap:
+  #  build: ./videocap_rtsp
+  #  volumes:
+  #    - ./videocap_rtsp:/usr/src/app
+  #    - ./appdata:/appdata
+  #    # -  
+  #  environment:
+  #    - CAPTURE_DURATION=10
+
+  eclipse-mosquitto:
+    # build: ./eclipse-mosquitto
+    container_name: eclipse-mosquitto
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto_passwd:/etc/mosquitto/passwd
+
+  # docker run -d --name="hass" --restart on-failure -v /home/pi/Projects/homeStatus/homeassistant_config:/config -e "TZ=America/Montreal" -p 8123:8123 homeassistant/raspberrypi3-homeassistant
+  homeassistant:
+    container_name: home-assistant
+    image: homeassistant/home-assistant
+    # image: homeassistant/raspberrypi3-homeassistant
+    volumes:
+      - ./homeassistant_config:/config
+      # - /path/to/your/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - "TZ=America/Montreal"
+    restart: always
+    network_mode: host
+    ports:
+      - "8123:8123"
+    privileged: true
+
+  influxdb:
+    image: influxdb
+    volumes:
+      - influx:/var/lib/influxdb
+    environment:
+      #INFLUXDB_ADMIN_USER: "FIX_ME"
+      #INFLUXDB_ADMIN_PASSWORD: "FIX_ME"
+      # - INFLUXDB_USER: 
+      # - INFLUXDB_USER_PASSWORD: 
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+      - "8090:8090"
+    restart: always
+
+  telegraf:
+    image: telegraf:1.6.1
+    #--net=container:influxdb
+    #network_mode: "container:influxdb"
+    network_mode: "host"
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - influxdb
+      - outsidetemp-service
+      - ecobee-service
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 0.0.0.0:3000:3000
+    environment:
+      GF_INSTALL_PLUGINS: "natel-discrete-panel"
+    volumes:
+      - grafana:/var/lib/grafana
+    depends_on:
+      - influxdb
+
+volumes:
+  influx:
+    driver: local
+  grafana:
+    driver: local
+  videocap:
+    driver: local
+
+
+
+
