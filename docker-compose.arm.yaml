@@ -10,6 +10,9 @@ services:
         driver: "json-file"
         options:
             max-size: "50m"
+  vault:
+    image: vault
+    #linux/arm/v6
 volumes:
   grafana:
     driver: local
