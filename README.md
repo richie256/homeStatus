@@ -12,12 +12,29 @@ Incorporate Ultrasonic distance.
 # MQTT
 Configure the MQTT
 
-<<<<<<< HEAD
 # Explore .local hosts
 
-# API Wunderground
-Keep the key secure
-http://api.wunderground.com/api/
+# ~~API Wunderground~~ --> need to change
+
+*Wunderground doesn't offer free API keys anymore*
+
+We need to find an alternative.
+--> Alternative openweathermap.org
+
+http://api.openweathermap.org/data/2.5/forecast?id={CITY_CODE_ID}&APPID={APPID}
+
+
+Frequency: 
+Calls per minute (no more than)	60
+no more than one time every 10 minutes for one location (city / coordinates / zip-code).
+
+
+If blocked:
+{
+"cod": 429,
+"message": "Your account is temporary blocked due to exceeding of requests limitation of your subscription type. 
+Please choose the proper subscription http://openweathermap.org/price"
+}
 
 
 # To execute:
