@@ -25,6 +25,7 @@ http://api.openweathermap.org/data/2.5/forecast?id={CITY_CODE_ID}&APPID={APPID}
 
 
 
+
 Frequency: 
 Calls per minute (no more than)	60
 no more than one time every 10 minutes for one location (city / coordinates / zip-code).
