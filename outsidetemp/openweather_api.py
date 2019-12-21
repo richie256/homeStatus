@@ -1,4 +1,4 @@
-    # OutsideTemp service
+# OutsideTemp service
 
 from flask import Flask
 from flask import Response

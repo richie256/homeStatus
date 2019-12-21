@@ -20,7 +20,7 @@ services:
   vault:
     image: vault:latest
     cap_add:
-      IPC_LOCK
+      - IPC_LOCK
     volumes:
       - ./vault/config:/vault/config
       - ./vault/policies:/vault/policies
