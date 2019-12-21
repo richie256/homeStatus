@@ -91,7 +91,7 @@ class OutsideTemp(Resource):
         self.observation_epoch = 0
 
         # Wind
-        self.windSpeed = 0
+        self.windSpeed = ''
         self.windDeg = 0
 
         # Weather condition
@@ -155,7 +155,7 @@ class OutsideTemp(Resource):
 
             # Wind
             # Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour.
-            self.windSpeed = int(parsed_json['wind']['speed'])
+            self.windSpeed = parsed_json['wind']['speed']
             self.windDeg   = int(parsed_json['wind']['deg'])
 
             # Weather condition
@@ -212,7 +212,7 @@ class OutsideTemp(Resource):
 
             influxdb_measurement = 'apidata'
             influxdb_tag_set = 'source=wunderground,location=' + self.location + ',opt_format=' + self.opt_format
-            influxdb_field_set = 'tempVal=' + str(self.tempVal) + ',humidity=' + str(self.humidity) + ',windSpeed=' + str(self.windSpeed) + ',windDeg=' + str(self.windDeg) + ',weatherId=' + str(self.weatherId)
+            influxdb_field_set = 'tempVal=' + str(self.tempVal) + ',humidity=' + str(self.humidity) + ',windSpeed=' + self.windSpeed + ',windDeg=' + str(self.windDeg) + ',weatherId=' + str(self.weatherId)
             influxdb_timestamp = self.observation_epoch + '000000000'
 
             returnValue = ( influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n' )
