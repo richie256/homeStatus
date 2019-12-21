@@ -12,6 +12,8 @@ Incorporate Ultrasonic distance.
 # MQTT
 Configure the MQTT
 
+mosquitto seems to take 100% of processor... desabled for now
+
 # Explore .local hosts
 
 # ~~API Wunderground~~ --> need to change
@@ -35,6 +37,7 @@ https://samples.openweathermap.org/data/2.5/weather?id=2172797&appid=b6907d289e1
 
 Weather Icons list:
 https://openweathermap.org/weather-conditions
+
 
 
 

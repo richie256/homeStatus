@@ -42,15 +42,15 @@ services:
   #  environment:
   #    - CAPTURE_DURATION=10
 
-  eclipse-mosquitto:
-    container_name: eclipse-mosquitto
-    image: eclipse-mosquitto
-    ports:
-      - 1883:1883
-      - 9001:9001
-    volumes:
-      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./mosquitto_passwd:/etc/mosquitto/passwd
+  #eclipse-mosquitto:
+  #  container_name: eclipse-mosquitto
+  #  image: eclipse-mosquitto
+  #  ports:
+  #    - 1883:1883
+  #    - 9001:9001
+  #  volumes:
+  #    - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+  #    - ./mosquitto_passwd:/etc/mosquitto/passwd
 
   homeassistant:
     container_name: home-assistant
