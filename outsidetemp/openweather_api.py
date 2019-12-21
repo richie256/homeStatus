@@ -73,8 +73,8 @@ class OutsideTemp(Resource):
         # Load variables
         with open('openweather-vars.json') as f:
             configdata = json.load(f)
- 
- 		self.OPENWEATHER_LOCATION_ID = configdata['LOCATION_ID']
+
+        self.OPENWEATHER_LOCATION_ID = configdata['LOCATION_ID']
         self.OPENWEATHER_API_KEY = configdata['API_KEY']
         self.OPENWEATHER_UNITS = configdata['UNITS']
 
