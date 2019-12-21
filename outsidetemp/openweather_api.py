@@ -66,7 +66,7 @@ class OutsideTemp(Resource):
     global wind_kph
     global wind_gust_kph
 
-    global OPENWEATHER_LOCATION_ID
+    #global OPENWEATHER_LOCATION_ID
     global OPENWEATHER_API_KEY
     global OPENWEATHER_UNITS
 
@@ -97,7 +97,13 @@ class OutsideTemp(Resource):
         with open('openweather-vars.json') as f:
             configdata = json.load(f)
 
-        self.OPENWEATHER_LOCATION_ID = configdata['LOCATION_ID']
+
+        self.opt_location_id = = request.args.get("location_id")
+        if self.opt_location_id is None:
+            logger.error('Problem with getting the location_id as parameter: Invalid.')
+            raise ValueError
+
+        #self.OPENWEATHER_LOCATION_ID = configdata['LOCATION_ID']
         self.OPENWEATHER_API_KEY = configdata['API_KEY']
         self.OPENWEATHER_UNITS = configdata['UNITS']
 
@@ -207,7 +213,7 @@ class OutsideTemp(Resource):
 
     #GET /conditions/Brossard?format=influx
 
-api.add_resource(OutsideTemp, '/conditions/<string:location>')
+api.add_resource(OutsideTemp, '/conditions/<int:location_id>')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
