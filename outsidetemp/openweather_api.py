@@ -97,8 +97,7 @@ class OutsideTemp(Resource):
         with open('openweather-vars.json') as f:
             configdata = json.load(f)
 
-
-        self.opt_location_id = = request.args.get("location_id")
+        self.opt_location_id = request.args.get("location_id")
         if self.opt_location_id is None:
             logger.error('Problem with getting the location_id as parameter: Invalid.')
             raise ValueError
