@@ -38,12 +38,24 @@ ch.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 
-
 app = Flask(__name__)
 api = Api(app)
 
 import socket
 
+def internet(host="1.1.1.1", port=53, timeout=3):
+    """
+    Host: 1.1.1.1 (1dot1dot1dot1.cloudflare-dns.com)
+    OpenPort: 53/tcp
+    Service: domain (DNS/TCP)
+    """
+    try:
+        socket.setdefaulttimeout(timeout)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        return True
+    except Exception as ex:
+        print(ex.message)
+        return False
 
 class OutsideTemp(Resource):
 
@@ -51,6 +63,7 @@ class OutsideTemp(Resource):
     CONST_INFLUX = 'influx'
 
     global location
+    global location_id
     global tempVal
     global relativeHumidity
     global observation_epoch
@@ -88,6 +101,7 @@ class OutsideTemp(Resource):
 
         self.location = ''
 
+        logger.info('About to retrieve the format')
         self.success_result = True
         self.opt_format = request.args.get("format")
         if self.opt_format is None:
@@ -97,9 +111,11 @@ class OutsideTemp(Resource):
         with open('openweather-vars.json') as f:
             configdata = json.load(f)
 
-        #self.OPENWEATHER_LOCATION_ID = configdata['LOCATION_ID']
-        self.OPENWEATHER_API_KEY = configdata['API_KEY']
-        self.OPENWEATHER_UNITS = configdata['UNITS']
+            #self.OPENWEATHER_LOCATION_ID = configdata['LOCATION_ID']
+            self.OPENWEATHER_API_KEY = configdata['API_KEY']
+            self.OPENWEATHER_UNITS = configdata['UNITS']
+        logger.info('Api Key:' + self.OPENWEATHER_API_KEY)
+        logger.info('Units:' + self.OPENWEATHER_UNITS)
 
 
     def getOutsideInfos(self, location_id):
@@ -110,7 +126,7 @@ class OutsideTemp(Resource):
         try:
             self.location_id = location_id
 
-            logger.error('Trying to get JSON from openweathermap (http://api.openweathermap.org/data/2.5/weather?id=' + location_id + '&appid=' + OPENWEATHER_API_KEY + '&units=' + OPENWEATHER_UNITS)
+            logger.error('Trying to get JSON from openweathermap (http://api.openweathermap.org/data/2.5/weather?id=' + str(location_id) + '&appid=' + self.OPENWEATHER_API_KEY + '&units=' + self.OPENWEATHER_UNITS)
 
             #self.location = location
 
@@ -122,8 +138,10 @@ class OutsideTemp(Resource):
                     nboftrials+=1
                     sleep(10)
 
+            logger.info('iconnected value:' + str(iconnected))
+
             #Python 3.4:
-            openweathermap = urlopen('http://api.openweathermap.org/data/2.5/weather?id=' + location_id + '&appid=' + OPENWEATHER_API_KEY + '&units=' + OPENWEATHER_UNITS )
+            openweathermap = urlopen('http://api.openweathermap.org/data/2.5/weather?id=' + str(location_id) + '&appid=' + self.OPENWEATHER_API_KEY + '&units=' + self.OPENWEATHER_UNITS )
 
 
             json_string = openweathermap.read()
@@ -161,8 +179,8 @@ class OutsideTemp(Resource):
             else:
                 logger.error('Problem with getting outside infos in JSON. openweathermap is None.')
 
-
-            logger.error(sys.exc_info()[0])
+            # logger.error(sys.exc_info()[0])
+            logger.error(sys.exc_info())
             return sys.exc_info()[0]
 
         finally:
@@ -170,11 +188,12 @@ class OutsideTemp(Resource):
                 openweathermap.close()
 
     def get(self,location_id):
+        logger.info('Receive a request. location_id: ' + str(location_id))
 
         self.getOutsideInfos(location_id)
 
         if (not self.success_result):
-            return ''
+            return None
 
         # JSON Format
         if self.opt_format == self.CONST_JSON:
