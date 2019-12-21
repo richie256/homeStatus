@@ -159,9 +159,9 @@ class OutsideTemp(Resource):
             self.windDeg   = int(parsed_json['wind']['deg'])
 
             # Weather condition
-            self.weatherId = int(parsed_json['weather']['id'])
-            self.weatherMain = parsed_json['weather']['main']
-            self.weatherDescription = parsed_json['weather']['description']
+            self.weatherId = int(parsed_json['weather'][0]['id'])
+            self.weatherMain = parsed_json['weather'][0]['main']
+            self.weatherDescription = parsed_json['weather'][0]['description']
 
             self.location = parsed_json['name']
 
