@@ -126,10 +126,6 @@ class OutsideTemp(Resource):
         try:
             self.location_id = location_id
 
-            logger.error('Trying to get JSON from openweathermap (http://api.openweathermap.org/data/2.5/weather?id=' + str(location_id) + '&appid=' + self.OPENWEATHER_API_KEY + '&units=' + self.OPENWEATHER_UNITS)
-
-            #self.location = location
-
             nboftrials=0
 
             while not iconnected and nboftrials<5:
@@ -137,8 +133,6 @@ class OutsideTemp(Resource):
                 if not iconnected:
                     nboftrials+=1
                     sleep(10)
-
-            logger.info('iconnected value:' + str(iconnected))
 
             #Python 3.4:
             openweathermap = urlopen('http://api.openweathermap.org/data/2.5/weather?id=' + str(location_id) + '&appid=' + self.OPENWEATHER_API_KEY + '&units=' + self.OPENWEATHER_UNITS )
@@ -161,11 +155,11 @@ class OutsideTemp(Resource):
 
             # Wind
             # Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour.
-            self.windSpeed = parsed_json['wind']['speed']
-            self.windDeg   = parsed_json['wind']['deg']
+            self.windSpeed = int(parsed_json['wind']['speed'])
+            self.windDeg   = int(parsed_json['wind']['deg'])
 
             # Weather condition
-            self.weatherId = parsed_json['weather']['id']
+            self.weatherId = int(parsed_json['weather']['id'])
             self.weatherMain = parsed_json['weather']['main']
             self.weatherDescription = parsed_json['weather']['description']
 
