@@ -97,25 +97,22 @@ class OutsideTemp(Resource):
         with open('openweather-vars.json') as f:
             configdata = json.load(f)
 
-        self.opt_location_id = request.args.get("location_id")
-        if self.opt_location_id is None:
-            logger.error('Problem with getting the location_id as parameter: Invalid.')
-            raise ValueError
-
         #self.OPENWEATHER_LOCATION_ID = configdata['LOCATION_ID']
         self.OPENWEATHER_API_KEY = configdata['API_KEY']
         self.OPENWEATHER_UNITS = configdata['UNITS']
 
 
-    def getOutsideInfos(self, location):
+    def getOutsideInfos(self, location_id):
         #Initialize
         openweathermap = None
         iconnected=False
 
         try:
-            logger.error('Trying to get JSON from openweathermap (http://api.openweathermap.org/data/2.5/weather?id=' + OPENWEATHER_LOCATION_ID + '&appid=' + OPENWEATHER_API_KEY + '&units=' + OPENWEATHER_UNITS)
+            self.location_id = location_id
 
-            self.location = location
+            logger.error('Trying to get JSON from openweathermap (http://api.openweathermap.org/data/2.5/weather?id=' + location_id + '&appid=' + OPENWEATHER_API_KEY + '&units=' + OPENWEATHER_UNITS)
+
+            #self.location = location
 
             nboftrials=0
 
@@ -126,7 +123,7 @@ class OutsideTemp(Resource):
                     sleep(10)
 
             #Python 3.4:
-            openweathermap = urlopen('http://api.openweathermap.org/data/2.5/weather?id=' + OPENWEATHER_LOCATION_ID + '&appid=' + OPENWEATHER_API_KEY + '&units=' + OPENWEATHER_UNITS )
+            openweathermap = urlopen('http://api.openweathermap.org/data/2.5/weather?id=' + location_id + '&appid=' + OPENWEATHER_API_KEY + '&units=' + OPENWEATHER_UNITS )
 
 
             json_string = openweathermap.read()
@@ -172,9 +169,9 @@ class OutsideTemp(Resource):
             if openweathermap is not None:
                 openweathermap.close()
 
-    def get(self,location):
+    def get(self,location_id):
 
-        self.getOutsideInfos(location)
+        self.getOutsideInfos(location_id)
 
         if (not self.success_result):
             return ''
