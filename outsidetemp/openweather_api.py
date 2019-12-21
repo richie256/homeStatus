@@ -85,7 +85,7 @@ class OutsideTemp(Resource):
 
     def __init__(self):
 
-        self.tempVal = 0
+        self.tempVal = ''
         self.pressure = 0
         self.humidity = 0
         self.observation_epoch = 0
@@ -142,7 +142,7 @@ class OutsideTemp(Resource):
             parsed_json = json.loads(json_string)
 
             # Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
-            self.tempVal = int(parsed_json['main']['temp'])
+            self.tempVal = parsed_json['main']['temp']
 
             # Atmospheric pressure (on the sea level, if there is no sea_level or grnd_level data), hPa
             self.pressure = int(parsed_json['main']['pressure'])
@@ -212,8 +212,8 @@ class OutsideTemp(Resource):
 
             influxdb_measurement = 'apidata'
             influxdb_tag_set = 'source=wunderground,location=' + self.location + ',opt_format=' + self.opt_format
-            influxdb_field_set = 'tempVal=' + str(self.tempVal) + ',humidity=' + str(self.humidity) + ',windSpeed=' + self.windSpeed + ',windDeg=' + str(self.windDeg) + ',weatherId=' + str(self.weatherId)
-            influxdb_timestamp = self.observation_epoch + '000000000'
+            influxdb_field_set = 'tempVal=' + str(self.tempVal) + ',humidity=' + str(self.humidity) + ',windSpeed=' + str(self.windSpeed) + ',windDeg=' + str(self.windDeg) + ',weatherId=' + str(self.weatherId)
+            influxdb_timestamp = str(self.observation_epoch) + '000000000'
 
             returnValue = ( influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n' )
 
