@@ -65,19 +65,19 @@ class OutsideTemp(Resource):
     global location
     global location_id
     global tempVal
-    global relativeHumidity
     global observation_epoch
 
-    global sunrise
-    global sunset
-    global sunrise_dict
-    global sunset_dict
+    global pressure
+    global humidity
 
-    global wind_string
-    global wind_dir
-    global wind_degrees
-    global wind_kph
-    global wind_gust_kph
+    # Wind
+    global windSpeed
+    global windDeg
+
+    # Weather condition
+    global weatherId
+    global weatherMain
+    global weatherDescription
 
     #global OPENWEATHER_LOCATION_ID
     global OPENWEATHER_API_KEY
@@ -212,7 +212,7 @@ class OutsideTemp(Resource):
 
             influxdb_measurement = 'apidata'
             influxdb_tag_set = 'source=wunderground,location=' + self.location + ',opt_format=' + self.opt_format
-            influxdb_field_set = 'tempVal=' + str(self.tempVal) + ',humidity=' + str(self.humidity) + ',windSpeed=' + str(windSpeed) + ',windDeg=' + str(windDeg) + ',weatherId=' + str(weatherId)
+            influxdb_field_set = 'tempVal=' + str(self.tempVal) + ',humidity=' + str(self.humidity) + ',windSpeed=' + str(self.windSpeed) + ',windDeg=' + str(self.windDeg) + ',weatherId=' + str(self.weatherId)
             influxdb_timestamp = self.observation_epoch + '000000000'
 
             returnValue = ( influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n' )
