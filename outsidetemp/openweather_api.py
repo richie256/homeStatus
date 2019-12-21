@@ -103,10 +103,15 @@ class OutsideTemp(Resource):
 
 
     def getOutsideInfos(self, location):
+        #Initialize
+        openweathermap = None
+        iconnected=False
+
         try:
+            logger.error('Trying to get JSON from openweathermap (http://api.openweathermap.org/data/2.5/weather?id=' + OPENWEATHER_LOCATION_ID + '&appid=' + OPENWEATHER_API_KEY + '&units=' + OPENWEATHER_UNITS)
+
             self.location = location
 
-            iconnected=False
             nboftrials=0
 
             while not iconnected and nboftrials<5:
@@ -115,12 +120,8 @@ class OutsideTemp(Resource):
                     nboftrials+=1
                     sleep(10)
 
-            # logger.debug('Trying to get JSON from openweathermap')
-
- 
             #Python 3.4:
-            openweathermap = None
-            openweathermap = urlopen('http://api.openweathermap.org/data/2.5/weather?id=' + OPENWEATHER_LOCATION_ID + '&appid=' + OPENWEATHER_API_KEY + '&units=metric' + OPENWEATHER_UNITS )
+            openweathermap = urlopen('http://api.openweathermap.org/data/2.5/weather?id=' + OPENWEATHER_LOCATION_ID + '&appid=' + OPENWEATHER_API_KEY + '&units=' + OPENWEATHER_UNITS )
 
 
             json_string = openweathermap.read()
@@ -194,7 +195,7 @@ class OutsideTemp(Resource):
         # Infux format
         elif self.opt_format == self.CONST_INFLUX:
 
-            influxdb_measurement = apidata
+            influxdb_measurement = 'apidata'
             influxdb_tag_set = 'source=wunderground,location=' + self.location + ',opt_format=' + self.opt_format
             influxdb_field_set = 'tempVal=' + str(self.tempVal) + ',humidity=' + str(self.humidity) + ',windSpeed=' + str(windSpeed) + ',windDeg=' + str(windDeg) + ',weatherId=' + str(weatherId)
             influxdb_timestamp = self.observation_epoch + '000000000'
