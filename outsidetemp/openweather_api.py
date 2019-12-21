@@ -47,7 +47,6 @@ class OutsideTemp(Resource):
     global OPENWEATHER_API_KEY
     global OPENWEATHER_UNITS
 
-	
     def __init__(self):
 
         self.tempVal = 0
@@ -72,8 +71,8 @@ class OutsideTemp(Resource):
             self.opt_format = self.CONST_JSON
 
         # Load variables
-		with open('openweather-vars.json') as f:
-		  configdata = json.load(f)
+        with open('openweather-vars.json') as f:
+            configdata = json.load(f)
  
  		self.OPENWEATHER_LOCATION_ID = configdata['LOCATION_ID']
         self.OPENWEATHER_API_KEY = configdata['API_KEY']
@@ -104,8 +103,7 @@ class OutsideTemp(Resource):
             json_string = openweathermap.read()
             parsed_json = json.loads(json_string)
 
-
-			# Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
+            # Default: Kelvin, Metric: Celsius, Imperial: Fahrenheit.
             self.tempVal = int(parsed_json['main']['temp'])
 
             # Atmospheric pressure (on the sea level, if there is no sea_level or grnd_level data), hPa
