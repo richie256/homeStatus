@@ -16,6 +16,8 @@ mosquitto seems to take 100% of processor... disabled for now
 
 # Explore .local hosts
 
+Google Domain Service (free service)
+
 # Outside temps from openweathermap.org
 
 Forecast:
@@ -48,11 +50,17 @@ Please choose the proper subscription http://openweathermap.org/price"
 
 # Ecobee thermostat
 
-- Incorporate changes in python-ecobee-api
-- merge the fork
-- Adapt the code using the new python-ecobee-api
-- Code optimisation
+- [ ] ~~Incorporate changes in python-ecobee-api~~
+- [ ] ~~merge the fork~~
+- [x] Adapt the code using the new python-ecobee-api
+- [ ] Code optimisation
+- [ ] Fully test expired tokens
 
+- [ ] Data Entry Flow:
+- [ ] Config step user
+- [ ] Config step authorize
+
+logging.getLogger("pyecobee")
 
 
 # To execute:
