@@ -66,11 +66,15 @@ Please choose the proper subscription http://openweathermap.org/price"
 - Enter the PIN in your Ecobee Account, then request the token: `curl http://localhost:5002/thermostat/ecobee/token/request`
 
 # To execute:
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml -d up homeassistant
+docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d homeassistant
 
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml -d up outsidetemp-service
+docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d outsidetemp-service
 
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml -d up outsidetemp-service ecobee-service influxdb telegraf grafana
+docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d outsidetemp-service ecobee-service influxdb telegraf grafana
+
+cd projects/homeStatus
+docker-compose -f docker-compose.yaml up -d outsidetemp-service ecobee-service influxdb telegraf grafana
+
 
 
 curl http://localhost:5002/thermostat/ecobee/resource/runtime?format=influx

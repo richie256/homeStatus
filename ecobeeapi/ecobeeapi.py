@@ -4,13 +4,11 @@ from pyecobee import Ecobee
 from pyecobee.errors import ExpiredTokenError
 from pyecobee.const import ECOBEE_ENDPOINT_THERMOSTAT
 
-from flask import Flask
-from flask import Response
-from flask import jsonify
-from flask import request
+from flask import Flask, abort, Response, jsonify, request
 
 import requests
 import json
+import time
 
 from requests.exceptions import RequestException
 
@@ -33,7 +31,7 @@ logger = logging.getLogger('pyecobee')
 logger.setLevel(logging.ERROR)
 # create file handler which logs even debug messages
 fh = logging.FileHandler('ecobee.log')
-fh.setLevel(logging.ERROR)
+fh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
 ch = logging.StreamHandler()
 ch.setLevel(logging.ERROR)
@@ -331,13 +329,26 @@ class ExtendedRuntimeClass(Resource):
     def get(self):
         thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
         thermostat.read_config_from_file()
-        try:
-            thermostat.get_thermostats()
-        except (ExpiredTokenError) as err:
-            logger.error("Token was expired.")
-            returnValue = thermostat.refresh_tokens()
-            thermostat._write_config()
-            thermostat.get_thermostats()
+        thermostatFetch = False
+        count = 0
+
+        while True:
+            try:
+                thermostatFetch = thermostat.get_thermostats()
+            except (ExpiredTokenError) as err:
+                logger.error("Token was expired.")
+                returnValue = thermostat.refresh_tokens()
+                thermostat._write_config()
+                thermostatFetch = thermostat.get_thermostats()
+
+            count += 1
+            if (count >= 3) or (thermostatFetch == True):
+                break
+            else:
+                time.sleep(3)
+
+        if thermostatFetch == False:
+            abort(500)
 
         return thermostat.getExtendedRuntime(0)
 
@@ -347,13 +358,26 @@ class RuntimeClass(Resource):
     def get(self):
         thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
         thermostat.read_config_from_file()
-        try:
-            thermostat.get_thermostats()
-        except (ExpiredTokenError) as err:
-            logger.error("Token was expired.")
-            returnValue = thermostat.refresh_tokens()
-            thermostat._write_config()
-            thermostat.get_thermostats()
+        thermostatFetch = False
+        count = 0
+
+        while True:
+            try:
+                thermostatFetch = thermostat.get_thermostats()
+            except (ExpiredTokenError) as err:
+                logger.error("Token was expired.")
+                returnValue = thermostat.refresh_tokens()
+                thermostat._write_config()
+                thermostatFetch = thermostat.get_thermostats()
+
+            count += 1
+            if (count >= 3) or (thermostatFetch == True):
+                break
+            else:
+                time.sleep(3)
+
+        if thermostatFetch == False:
+            abort(500)
 
         return thermostat.getRuntimeAndRemoteSensors(0)
 
