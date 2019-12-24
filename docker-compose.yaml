@@ -15,6 +15,24 @@ services:
     ports:
       - 5002:80
 
+  # docker run --cap-add=IPC_LOCK -e 'VAULT_DEV_ROOT_TOKEN_ID=myroot' -e 'VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:1234' vault
+  # docker run --cap-add=IPC_LOCK -e 'VAULT_LOCAL_CONFIG={"backend": {"file": {"path": "/vault/file"}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h"}' vault server
+  vault:
+    image: vault:latest
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./vault/config:/vault/config
+      - ./vault/policies:/vault/policies
+      - ./vault/data:/vault/data
+    ports:
+      - 8200:8200
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+      - VAULT_ADDRESS=http://0.0.0.0:8200
+    command: vault server -config=/vault/config/vault.json
+
   #videocap:
   #  build: ./videocap_rtsp
   #  volumes:
@@ -24,25 +42,21 @@ services:
   #  environment:
   #    - CAPTURE_DURATION=10
 
-  eclipse-mosquitto:
-    # build: ./eclipse-mosquitto
-    container_name: eclipse-mosquitto
-    image: eclipse-mosquitto
-    ports:
-      - "1883:1883"
-      - "9001:9001"
-    volumes:
-      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./mosquitto_passwd:/etc/mosquitto/passwd
+  #eclipse-mosquitto:
+  #  container_name: eclipse-mosquitto
+  #  image: eclipse-mosquitto
+  #  ports:
+  #    - 1883:1883
+  #    - 9001:9001
+  #  volumes:
+  #    - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+  #    - ./mosquitto_passwd:/etc/mosquitto/passwd
 
-  # docker run -d --name="hass" --restart on-failure -v /home/pi/Projects/homeStatus/homeassistant_config:/config -e "TZ=America/Montreal" -p 8123:8123 homeassistant/raspberrypi3-homeassistant
   homeassistant:
     container_name: home-assistant
     image: homeassistant/home-assistant
-    # image: homeassistant/raspberrypi3-homeassistant
     volumes:
       - ./homeassistant_config:/config
-      # - /path/to/your/config:/config
       - /etc/localtime:/etc/localtime:ro
     environment:
       - "TZ=America/Montreal"
@@ -56,9 +70,11 @@ services:
     image: influxdb
     volumes:
       - influx:/var/lib/influxdb
-    environment:
-      INFLUXDB_ADMIN_USER: "FIX_ME"
-      INFLUXDB_ADMIN_PASSWORD: "FIX_ME"
+    env_file:
+      influxdb-variables.env
+    #environment:
+    #  INFLUXDB_ADMIN_USER: "FIX_ME"
+    #  INFLUXDB_ADMIN_PASSWORD: "FIX_ME"
       # - INFLUXDB_USER: 
       # - INFLUXDB_USER_PASSWORD: 
     ports:
@@ -69,8 +85,6 @@ services:
 
   telegraf:
     image: telegraf:1.6.1
-    #--net=container:influxdb
-    #network_mode: "container:influxdb"
     network_mode: "host"
     volumes:
       - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro

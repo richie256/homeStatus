@@ -3,4 +3,4 @@ COPY requirements.txt /usr/src/app/requirements.txt
 WORKDIR /usr/src/app
 RUN pip3 install --trusted-host pypi.python.org -r requirements.txt
 COPY . /usr/src/app
-CMD ["python", "outsidetemp_api.py"]
+CMD ["python", "openweather_api.py"]

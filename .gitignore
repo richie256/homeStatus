@@ -1,0 +1,7 @@
+.DS_Store
+influxdb-variables.env
+outsidetemp/openweather-vars.json
+outsidetemp/openweather.log
+ecobeeapi/ecobee.log
+ecobeeapi/ecobee.conf
+
