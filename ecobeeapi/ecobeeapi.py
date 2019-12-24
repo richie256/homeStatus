@@ -358,13 +358,13 @@ class RuntimeClass(Resource):
         return thermostat.getRuntimeAndRemoteSensors(0)
 
 
-class EcobeeThermostatRefreshTokens(Resource):
-    '''Class to Refresh the Token.'''
+class EcobeeThermostatRequestTokens(Resource):
+    '''Class to Request the Token.'''
     def get(self):
         thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
         thermostat.read_config_from_file()
 
-        returnValue = thermostat.refresh_tokens()
+        returnValue = thermostat.request_tokens()
         if returnValue:
             message="Success"
             thermostat._write_config()
@@ -412,7 +412,7 @@ api.add_resource(EcobeeThermostatApiKey, '/thermostat/ecobee/apiKey/<api_key>')
 api.add_resource(ExtendedRuntimeClass, '/thermostat/ecobee/resource/extended-runtime')
 api.add_resource(RuntimeClass, '/thermostat/ecobee/resource/runtime')
 
-api.add_resource(EcobeeThermostatRefreshTokens, '/thermostat/ecobee/token/request')
+api.add_resource(EcobeeThermostatRequestTokens, '/thermostat/ecobee/token/request')
 api.add_resource(EcobeeThermostatRequestPin, '/thermostat/ecobee/pin/request')
 
 

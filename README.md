@@ -1,7 +1,15 @@
 # homeStatus
 
+# TODO List
 
-## TODO: create a new password mosquitto_passwd
+- [x] Fix the temperature service
+- [x] Fix the ecobee service
+- [x] Adapt the code using the new python-ecobee-api
+- [ ] Create a new password mosquitto_passwd
+- [ ] Incorporate Ultrasonic distance
+- [ ] Google Domain Service (free service)
+- [ ] Explore .local hosts
+
 
 # docker Compose File
 InfluxDB: Set a Username and password
@@ -13,10 +21,6 @@ Incorporate Ultrasonic distance.
 Configure the MQTT
 
 mosquitto seems to take 100% of processor... disabled for now
-
-# Explore .local hosts
-
-Google Domain Service (free service)
 
 # Outside temps from openweathermap.org
 
@@ -39,7 +43,6 @@ Frequency:
 Calls per minute (no more than)	60
 no more than one time every 10 minutes for one location (city / coordinates / zip-code).
 
-
 If blocked:
 {
 "cod": 429,
@@ -47,28 +50,27 @@ If blocked:
 Please choose the proper subscription http://openweathermap.org/price"
 }
 
-
 # Ecobee thermostat
 
 - [ ] ~~Incorporate changes in python-ecobee-api~~
 - [ ] ~~merge the fork~~
 - [x] Adapt the code using the new python-ecobee-api
-- [ ] Code optimisation
-- [ ] Fully test expired tokens
+- [x] Code optimisation
+- [x] Fully test expired tokens
 
-- [ ] Data Entry Flow:
-- [ ] Config step user
-- [ ] Config step authorize
-
-logging.getLogger("pyecobee")
-
+## How to update ecobee config
+- Log into your Ecobee account and create a new API under Developer.
+- Using the API Key, call the `curl http://localhost:5002/thermostat/ecobee/apiKey/<api_key>`
+- Put the logs in Debug Mode.
+- Request a new pin: `curl http://localhost:5002/thermostat/ecobee/pin/request` then retrieve the PIN from the Debug logs.
+- Enter the PIN in your Ecobee Account, then request the token: `curl http://localhost:5002/thermostat/ecobee/token/request`
 
 # To execute:
 docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml -d up homeassistant
 
-
 docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml -d up outsidetemp-service
 
+docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml -d up outsidetemp-service ecobee-service influxdb telegraf grafana
 
 
 curl http://localhost:5002/thermostat/ecobee/resource/runtime?format=influx
@@ -76,6 +78,7 @@ curl http://localhost:5002/thermostat/ecobee/resource/runtime?format=influx
 curl http://localhost:5002/thermostat/ecobee/resource/extended-runtime?format=influx
 
 curl http://localhost:5001/conditions/5909629?format=influx
+
 
 
 If I want to test the vault outside a container: I do (for example): http://localhost:8200/v1/sys/seal-status
