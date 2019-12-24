@@ -1,6 +1,8 @@
 # Ecobee service
 
 from pyecobee import Ecobee
+from pyecobee.errors import ExpiredTokenError
+from pyecobee.const import ECOBEE_ENDPOINT_THERMOSTAT
 
 from flask import Flask
 from flask import Response
@@ -8,11 +10,7 @@ from flask import jsonify
 from flask import request
 
 import requests
-import os
 import json
-#from datetime import datetime
-#import calendar
-#import pytz
 
 from requests.exceptions import RequestException
 
@@ -20,26 +18,22 @@ from requests.exceptions import RequestException
 from flask_restful import Resource, Api
 
 import logging
-import inspect
-
-from dateutil import tz
 
 from const import (
     JSON,
     INFLUX,
     ECOBEE_DATETIME_FORMAT,
-    ECOBEE_ENDPOINT_THERMOSTAT,
 )
 
-from util import toFarenheit, toCelsius, ts_utc_from_datestr
+from util import toFarenheit, toCelsius, ts_utc_from_datestr, hvacModeToInt
 
 # create logger with 'ecobee_application'
 logger = logging.getLogger('pyecobee')
 
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 # create file handler which logs even debug messages
 fh = logging.FileHandler('ecobee.log')
-fh.setLevel(logging.DEBUG)
+fh.setLevel(logging.ERROR)
 # create console handler with a higher log level
 ch = logging.StreamHandler()
 ch.setLevel(logging.ERROR)
@@ -54,33 +48,10 @@ logger.addHandler(ch)
 app = Flask(__name__)
 api = Api(app)
 
-# def config_from_file(filename, config=None):
-#     ''' Small configuration file management function'''
-#     if config:
-#         # We're writing configuration
-#         try:
-#             with open(filename, 'w') as fdesc:
-#                 fdesc.write(json.dumps(config))
-#         except IOError as error:
-#             logger.exception(error)
-#             return False
-#         return True
-#     else:
-#         # We're reading config
-#         if os.path.isfile(filename):
-#             try:
-#                 with open(filename, 'r') as fdesc:
-#                     return json.loads(fdesc.read())
-#             except IOError as error:
-#                 return False
-#         else:
-#             return {}
-
-
 class EcobeeEnhanced(Ecobee):
 
     def __init__(self, config_filename: str = None, config: dict = None):
-
+        """Override the __init___ and set the request format arg."""
         self.opt_format = request.args.get("format")
         if self.opt_format is None:
             self.opt_format = JSON
@@ -120,377 +91,20 @@ class EcobeeEnhanced(Ecobee):
             return False
 
     def set_api_key(self, api_key):
+        '''Set a new Api Key and write the config.'''
         self.api_key = api_key
 
         return self._write_config();
 
 
-
-
-# class Ecobee(object):
-#     ''' Class for storing Ecobee Thermostats and Sensors '''
-#     #CONST_JSON = 'JSON'
-#     #CONST_INFLUX = 'influx'
-#     #CONST_DROPWIZARD = 'dropwizard'
-
-#     def __init__(self, config_filename=None, api_key=None, config=None):
-#         self.thermostats = list()
-#         self.pin = None
-#         self.authenticated = False
-#         self.include_occupancy = True
-
-#         if config is None:
-#             self.file_based_config = True
-#             if config_filename is None:
-#                 if api_key is None:
-#                     logger.error("Error. No API Key was supplied.")
-#                     return
-#                 jsonconfig = {"API_KEY": api_key}
-#                 config_filename = 'ecobee.conf'
-#                 config_from_file(config_filename, jsonconfig)
-#             config = config_from_file(config_filename)
-#         else:
-#             self.file_based_config = False
-#         self.api_key = config['API_KEY']
-#         self.config_filename = config_filename
-
-#         if 'ACCESS_TOKEN' in config:
-#             self.access_token = config['ACCESS_TOKEN']
-#         else:
-#             self.access_token = ''
-
-#         if 'AUTHORIZATION_CODE' in config:
-#             self.authorization_code = config['AUTHORIZATION_CODE']
-#         else:
-#             self.authorization_code = ''
-
-#         if 'REFRESH_TOKEN' in config:
-#             self.refresh_token = config['REFRESH_TOKEN']
-#         else:
-#             # We don't want to mess up with authorisation in progress.
-#             if 'AUTHORIZATION_CODE' not in config:
-#                 self.refresh_token = ''
-#                 self.request_pin()
-#             return
-
-#         self.update()
-
-#         self.opt_format = request.args.get("format")
-#         if self.opt_format is None:
-#         	self.opt_format = self.CONST_JSON
-
-
-#     def request_pin(self):
-#         ''' Method to request a PIN from ecobee for authorization '''
-#         url = 'https://api.ecobee.com/authorize'
-#         params = {'response_type': 'ecobeePin',
-#                   'client_id': self.api_key, 'scope': 'smartWrite'}
-#         try:
-#             request = requests.get(url, params=params)
-#         except RequestException:
-#             logger.warn("Error connecting to Ecobee.  Possible connectivity outage."
-#                         "Could not request pin.")
-#             return
-#         try:
-#             self.authorization_code = request.json()['code']
-#         except:
-#             logger.error('Error calling request_pin.\nRequest output:\n' + json.dumps(request.json(), indent = 4) + '\nRequest params:\n' + json.dumps(params, indent = 4) + '\nRequest URL: ' + url)
-
-#         self.pin = request.json()['ecobeePin']
-#         logger.error('Please authorize your ecobee developer app with PIN code '
-#               + self.pin + '\nGoto https://www.ecobee.com/consumerportal'
-#               '/index.html, click\nMy Apps, Add application, Enter Pin'
-#               ' and click Authorize.\nAfter authorizing, call request_'
-#               'tokens() method.')
-#         # new:
-#         self.write_tokens_to_file()
-
-#     def request_tokens(self):
-#         ''' Method to request API tokens from ecobee '''
-#         url = 'https://api.ecobee.com/token'
-#         params = {'grant_type': 'ecobeePin', 'code': self.authorization_code,
-#                   'client_id': self.api_key}
-#         try:
-#             request = requests.post(url, params=params)
-#         except RequestException:
-#             logger.warn("Error connecting to Ecobee.  Possible connectivity outage."
-#                         "Could not request token.")
-#             return
-#         if request.status_code == requests.codes.ok:
-#             self.access_token = request.json()['access_token']
-#             self.refresh_token = request.json()['refresh_token']
-#             self.write_tokens_to_file()
-#             self.pin = None
-#         else:
-#             logger.warn('Error while requesting tokens from ecobee.com.'
-#                   ' Status code: ' + str(request.status_code) + '\n' +
-#                   'request: ' + json.dumps(request.json(), indent = 4) + '\n' +
-#                   'params: ' +  json.dumps(params, indent = 4))
-#             return
-
-#     def refresh_tokens(self):
-#         ''' Method to refresh API tokens from ecobee '''
-#         url = 'https://api.ecobee.com/token'
-#         params = {'grant_type': 'refresh_token',
-#                   'refresh_token': self.refresh_token,
-#                   'client_id': self.api_key}
-#         request = requests.post(url, params=params)
-#         if request.status_code == requests.codes.ok:
-#             self.access_token = request.json()['access_token']
-#             self.refresh_token = request.json()['refresh_token']
-#             self.write_tokens_to_file()
-#             return True
-#         else:
-#             self.request_pin()
-
-
-#     ''' DO NOT poll at an interval quicker than once every 3 minutes, which is the shortest interval at which data might change. '''
-#     def getThermostatSummary(self):
-#         url = 'https://api.ecobee.com/1/thermostat'
-#         header = {'Content-Type': 'application/json;charset=UTF-8',
-#                   'Authorization': 'Bearer ' + self.access_token}
-#         params = {'json': ('{"selection":{"selectionType":"registered",'
-#                             '"selectionMatch":"",'
-#                             '"includeEquipmentStatus":"true"}}')}
-#         try:
-#             request = requests.get(url, headers=header, params=params)
-#         except RequestException:
-#             logger.warn("Error connecting to Ecobee.  Possible connectivity outage.")
-#             return None
-#         if request.status_code == requests.codes.ok:
-#             self.authenticated = True
-#             self.thermostats = request.json()['thermostatList']
-#             # logger.info("Autheticated. there is returned value: " + json.dumps(self.thermostats[0], indent = 4))
-#             return self.thermostats
-
-
-#         ''' "selectionType":"registered","selectionMatch":"","includeEquipmentStatus":true '''
-
-
-#     def get_thermostats(self):
-#         ''' Set self.thermostats to a json list of thermostats from ecobee '''
-#         url = 'https://api.ecobee.com/1/thermostat'
-#         header = {'Content-Type': 'application/json;charset=UTF-8',
-#                   'Authorization': 'Bearer ' + self.access_token}
-#         params = {'json': ('{"selection":{"selectionType":"registered",'
-#                             '"includeRuntime":"true",'
-#                             '"includeExtendedRuntime":"true",'
-#                             '"includeSensors":"true",'
-#                             '"includeProgram":"true",'
-#                             '"includeEquipmentStatus":"true",'
-#                             '"includeEvents":"true",'
-#                             '"includeWeather":"true",'
-#                             '"includeSettings":"true"}}')}
-#         try:
-#             request = requests.get(url, headers=header, params=params)
-#         except RequestException:
-#             logger.warn("Error connecting to Ecobee.  Possible connectivity outage.")
-#             return None
-#         if request.status_code == requests.codes.ok:
-#             self.authenticated = True
-#             self.thermostats = request.json()['thermostatList']
-#             # logger.info("Autheticated. there is returned value: " + json.dumps(self.thermostats[0], indent = 4))
-#             return self.thermostats
-#         else:
-#             self.authenticated = False
-#             logger.info("Error connecting to Ecobee while attempting to get "
-#                   "thermostat data.  Refreshing tokens and trying again.")
-#             if self.refresh_tokens():
-#                 return self.get_thermostats()
-#             else:
-#                 return None
-
-#     def get_thermostat(self, index):
-#         ''' Return a single thermostat based on index '''
-#         return self.thermostats[index]
-
-#     def get_remote_sensors(self, index):
-#         ''' Return remote sensors based on index '''
-#         return self.thermostats[index]['remoteSensors']
-
-#     def write_tokens_to_file(self):
-#         ''' Write api tokens to a file '''
-#         config = dict()
-#         try:
-#             if self.api_key != '':
-#                 config['API_KEY'] = self.api_key
-#         except:
-#             pass
-#         try:
-#             if self.access_token != '':
-#                 config['ACCESS_TOKEN'] = self.access_token
-#         except:
-#             pass
-#         try:
-#             if self.refresh_token != '':
-#                 config['REFRESH_TOKEN'] = self.refresh_token
-#         except:
-#             pass
-#         try:
-#             if self.authorization_code != '':
-#                 config['AUTHORIZATION_CODE'] = self.authorization_code
-#         except:
-#             pass
-#         if self.file_based_config:
-#             config_from_file(self.config_filename, config)
-#         else:
-#             self.config = config
-
-#     def update(self):
-#         ''' Get new thermostat data from ecobee '''
-#         self.get_thermostats()
-
-#     def make_request(self, body, log_msg_action):
-#         url = 'https://api.ecobee.com/1/thermostat'
-#         header = {'Content-Type': 'application/json;charset=UTF-8',
-#                   'Authorization': 'Bearer ' + self.access_token}
-#         params = {'format': 'json'}
-#         try:
-#             request = requests.post(url, headers=header, params=params, data=json.dumps(body))
-#         except RequestException:
-#             logger.warn("Error connecting to Ecobee.  Possible connectivity outage.")
-#             return None
-#         if request.status_code == requests.codes.ok:
-#             return request
-#         else:
-#             logger.info("Error connecting to Ecobee while attempting to %s.  "
-#                         "Refreshing tokens and trying again.", log_msg_action)
-#             if self.refresh_tokens():
-#                 return self.make_request(json.dumps(body), log_msg_action)
-#             else:
-#                 return None
-
-#     def set_hvac_mode(self, index, hvac_mode):
-#         ''' possible hvac modes are auto, auxHeatOnly, cool, heat, off '''
-#         body = {"selection": {"selectionType": "thermostats",
-#                               "selectionMatch": self.thermostats[index]['identifier']},
-#                               "thermostat": {
-#                                   "settings": {
-#                                       "hvacMode": hvac_mode
-#                                   }
-#                               }}
-#         log_msg_action = "set HVAC mode"
-#         return self.make_request(body, log_msg_action)
-
-#     def set_fan_min_on_time(self, index, fan_min_on_time):
-#         ''' The minimum time, in minutes, to run the fan each hour. Value from 1 to 60 '''
-#         body = {"selection": {"selectionType": "thermostats",
-#                         "selectionMatch": self.thermostats[index]['identifier']},
-#                         "thermostat": {
-#                             "settings": {
-#                                 "fanMinOnTime": fan_min_on_time
-#                             }
-#                         }}
-#         log_msg_action = "set fan minimum on time."
-#         return self.make_request(body, log_msg_action)
-
-#     def set_fan_mode(self, index, fan_mode, cool_temp, heat_temp, hold_type="nextTransition"):
-#         ''' Set fan mode. Values: auto, minontime, on '''
-#         body = {"selection": {
-#                     "selectionType": "thermostats",
-#                     "selectionMatch": self.thermostats[index]['identifier']},
-#                 "functions": [{"type": "setHold", "params": {
-#                     "holyType": hold_type,
-#                     "coolHoldTemp": cool_temp * 10,
-#                     "heatHoldTemp": heat_temp * 10,
-#                     "fan": fan_mode
-#                 }}]}
-#         log_msg_action = "set fan mode"
-#         return self.make_request(body, log_msg_action)
-
-#     def set_hold_temp(self, index, cool_temp, heat_temp,
-#                       hold_type="nextTransition"):
-#         ''' Set a hold '''
-#         body = {"selection": {
-#                     "selectionType": "thermostats",
-#                     "selectionMatch": self.thermostats[index]['identifier']},
-#                 "functions": [{"type": "setHold", "params": {
-#                     "holyType": hold_type,
-#                     "coolHoldTemp": cool_temp * 10,
-#                     "heatHoldTemp": heat_temp * 10
-#                 }}]}
-#         log_msg_action = "set hold temp"
-#         return self.make_request(body, log_msg_action)
-
-#     def set_climate_hold(self, index, climate, hold_type="nextTransition"):
-#         ''' Set a climate hold - ie away, home, sleep '''
-#         body = {"selection": {
-#                     "selectionType": "thermostats",
-#                     "selectionMatch": self.thermostats[index]['identifier']},
-#                 "functions": [{"type": "setHold", "params": {
-#                     "holyType": hold_type,
-#                     "holdClimateRef": climate
-#                 }}]}
-#         log_msg_action = "set climate hold"
-#         return self.make_request(body, log_msg_action)
-
-#     def delete_vacation(self, index, vacation):
-#         ''' Delete the vacation with name vacation '''
-#         body = {"selection": {
-#                     "selectionType": "thermostats",
-#                     "selectionMatch": self.thermostats[index]['identifier']},
-#                 "functions": [{"type": "deleteVacation", "params": {
-#                     "name": vacation
-#                 }}]}
-
-#         log_msg_action = "delete a vacation"
-#         return self.make_request(body, log_msg_action)
-
-#     def resume_program(self, index, resume_all=False):
-#         ''' Resume currently scheduled program '''
-#         body = {"selection": {
-#                     "selectionType": "thermostats",
-#                     "selectionMatch": self.thermostats[index]['identifier']},
-#                 "functions": [{"type": "resumeProgram", "params": {
-#                     "resumeAll": resume_all
-#                 }}]}
-
-#         log_msg_action = "resume program"
-#         return self.make_request(body, log_msg_action)
-
-#     def send_message(self, index, message="Hello from python-ecobee!"):
-#         ''' Send a message to the thermostat '''
-#         body = {"selection": {
-#                     "selectionType": "thermostats",
-#                     "selectionMatch": self.thermostats[index]['identifier']},
-#                 "functions": [{"type": "sendMessage", "params": {
-#                     "text": message[0:500]
-#                 }}]}
-
-#         log_msg_action = "send message"
-#         return self.make_request(body, log_msg_action)
-
-#     def set_humidity(self, index, humidity):
-#         ''' Set humidity level'''
-#         body = {"selection": {"selectionType": "thermostats",
-#                               "selectionMatch": self.thermostats[index]['identifier']},
-#                               "thermostat": {
-#                                   "settings": {
-#                                       "humidity": int(humidity)
-#                                   }
-#                               }}
-
-#         log_msg_action = "set humidity level"
-#         return self.make_request(body, log_msg_action)
-
-
     def getExtendedRuntime(self, index):
-
-        # return self.thermostats[index]['extendedRuntime'];
-        # return self.thermostats[index];
+        '''Class to get the Extended Runtime.'''
 
         # get the serial number for this thermostat (as a string)
         stat_id = str(self.thermostats[index]['identifier']) + '_'
 
-        # extendedRuntimeList = self.thermostat['extendedRuntime']
-
-        # return jsonify(self.thermostat)
-
         # extendedRuntimeList = self.thermostat.get('extendedRuntime')
         # extendedRuntimeList = self.thermostat['extendedRuntime']
-
-        # self.thermostats[index]['remoteSensors']
-
 
         # reference: https://git.ahfc.us/energy/bmon/blob/e8a13fc1487a7209419bac45c81b27051c57481c/bmsapp/periodic_scripts/ecobee.py
 
@@ -511,7 +125,6 @@ class EcobeeEnhanced(Ecobee):
         # If you do not specify a timestamp for your data point InfluxDB uses the server's local nanosecond timestamp in UTC.
 
         last_ts_str = self.thermostats[index]['extendedRuntime']['lastReadingTimestamp']
-        # last_ts = self.ts_from_datestr(last_ts_str)
         last_ts = ts_utc_from_datestr(last_ts_str)
 
         tstamps = [last_ts - 600, last_ts - 300, last_ts]
@@ -519,40 +132,33 @@ class EcobeeEnhanced(Ecobee):
         # get temperature values
         vals = self.thermostats[index]['extendedRuntime']['actualTemperature']
         actualTemperature = [round(toCelsius(val / 10.0),2) for val in vals]   # they are expressed in tenths, so convert
-        # actualTemperature = vals
 
         # get Humidity values
         actualHumidity = self.thermostats[index]['extendedRuntime']['actualHumidity']
-        # actualHumidity = vals
 
         # get heating setpoints
         vals = self.thermostats[index]['extendedRuntime']['desiredHeat']
         desiredHeat = [round(toCelsius(val / 10.0),2) for val in vals]  # they are expressed in tenths, so convert
-        # desiredHeat = vals
 
         # get cooling setpoints
         vals = self.thermostats[index]['extendedRuntime']['desiredCool']
         desiredCool = [round(toCelsius(val / 10.0),2) for val in vals]  # they are expressed in tenths, so convert
-        # desiredCool = vals
 
         # get humidity setpoints
         # The last three 5 minute desired humidity readings.
         desiredHumidity = self.thermostats[index]['extendedRuntime']['desiredHumidity']
         # vals = [val / 10.0 for val in vals]  # they are expressed in tenths, so convert
-        # desiredHumidity = vals
 
         # get de-humidity setpoints
         # The last three 5 minute desired de-humidification readings.
         desiredDehumidity = self.thermostats[index]['extendedRuntime']['desiredDehumidity']
         # vals = [val / 10.0 for val in vals]  # they are expressed in tenths, so convert
-        # desiredDehumidity = vals
 
 
         # get HVAC Runtime values in seconds (0-300 seconds) of heat pump stage 1 runtime values
         vals = self.thermostats[index]['extendedRuntime']['heatPump1']
         # convert to fractional runtime from seconds / 5 minute interval
         heatPump1 = [val / 300.0 for val in vals]
-        # heatPump1 = vals
 
         # # get HVAC Runtime values in seconds (0-300 seconds) of heat pump stage 2 runtime values
         # vals = self.thermostats[index]['extendedRuntime']['heatPump2']
@@ -563,13 +169,11 @@ class EcobeeEnhanced(Ecobee):
         vals = self.thermostats[index]['extendedRuntime']['auxHeat1']
         # convert to fractional runtime from seconds / 5 minute interval
         auxHeat1 = [val / 300.0 for val in vals]
-        # auxHeat1 = vals
 
         # Runtime values (0-300 seconds) of cooling stage 1
         vals = self.thermostats[index]['extendedRuntime']['fan']
         # convert to fractional runtime from seconds / 5 minute interval
         fan = [val / 300.0 for val in vals]
-        # fan = vals
 
         # # get HVAC Runtime values in seconds (0-300 seconds) of auxiliary heat stage 2 values
         # vals = self.thermostats[index]['extendedRuntime']['auxHeat2']
@@ -585,7 +189,6 @@ class EcobeeEnhanced(Ecobee):
         vals = self.thermostats[index]['extendedRuntime']['cool1']
         # convert to fractional runtime from seconds / 5 minute interval
         cool1 = [val / 300.0 for val in vals]
-        # cool1 = vals
 
         # # Runtime values (0-300 seconds) of cooling stage 2
         # vals = self.thermostats[index]['extendedRuntime']['cool2']
@@ -604,35 +207,9 @@ class EcobeeEnhanced(Ecobee):
 
         return Response(returnValue, mimetype='text/xml')
 
-#         """
-#         lastReadingTimestamp
-#         runtimeDate
-#         runtimeInterval
-#         actualTemperature
-#         actualHumidity
-#         desiredHeat
-#         desiredCool
-#         desiredHumidity
-#         desiredDehumidity
-#         dmOffset
-#         hvacMode
-#         heatPump1
-#         heatPump2
-#         auxHeat1
-#         auxHeat2
-#         auxHeat3
-#         cool1
-#         cool2
-#         fan
-#         humidifier
-#         dehumidifier
-#         economizer
-#         ventilator
-#         currentElectricityBill
-#         projectedElectricityBill
-#         """
 
     def getRuntimeAndRemoteSensors(self, index):
+        '''Class to extract the Runtime and Remote Sensors data.'''
 
         occupval = 0
 
@@ -647,7 +224,6 @@ class EcobeeEnhanced(Ecobee):
         # Extract runtime and remoteSensors
 
         sensor_ts_str = self.thermostats[index]['runtime']['lastStatusModified']
-        # sensor_ts = self.ts_from_datestr(sensor_ts_str)
         sensor_ts = ts_utc_from_datestr(sensor_ts_str)
 
         sensors = []
@@ -671,9 +247,6 @@ class EcobeeEnhanced(Ecobee):
 
         else:
             self.desiredTemperature = 0
-
-
-        logger.debug("Thermostat: " + str(self.thermostats[index]))
 
         # for sensor in stat['remoteSensors']:
         for sensor in self.thermostats[index]['remoteSensors']:
@@ -701,9 +274,6 @@ class EcobeeEnhanced(Ecobee):
 
                     # readings.append((sensor_ts, sens_id + 'temp', float(capability['value'])/10.0))
                     if sensor['type'] == 'ecobee3_remote_sensor':
-                        logger.debug("Capability: " + str(capability))
-                        logger.debug("Sensor: " + str(sensor))
-
                         if capability['value'] == 'unknown':
                             tempval = -999
                         else:
@@ -737,209 +307,59 @@ class EcobeeEnhanced(Ecobee):
             # sensor[4] # occupval
             if sensor[2] != -999:
                 influxdb_measurement = 'apidata'
-                influxdb_tag_set = 'source=ecobee,location=Brossard,opt_format=' + self.opt_format + ',type=remotesensor,sensor_id=' + sensor[1] + ',mode=realtime,sensor_name=' + sensor[3]
+                influxdb_tag_set = 'source=ecobee,location=Brossard,opt_format=' + self.opt_format + ',type=remotesensor,sensor_id=' + sensor[1] + ',mode=realtime,sensor_name=' + sensor[3].replace(' ', '\ ')
                 influxdb_field_set = 'temperature=' + str(sensor[2]) + ',occupancy=' + str(sensor[4])
                 influxdb_timestamp = str(int(sensor[0])) + '000000000'
 
                 returnValue += ( influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n' )
-                # returnValue += 'apidata,source=ecobee,location=Brossard,opt_format=' + self.opt_format + ',type=remotesensor,sensor_id=' + sensor[1] + ',mode=realtime,sensor_name=' + sensor[3] + ' ' + 'temperature=' + str(sensor[2]) + ',occupancy=' + str(sensor[4]) + ' ' + str(int(sensor[0])) + '000000000' + '\n'
 
         # Thermostat
         if tempval != -999:
             influxdb_measurement = 'apidata'
             influxdb_tag_set = 'source=ecobee,location=Brossard,opt_format=' + self.opt_format + ',type=thermostat,mode=realtime'
-            influxdb_field_set = 'occupancy=' + str(thermostat_occup) + ',hvacMode=' + str(self.hvacModeToInt(self.hvacMode)) + ',desiredHeat=' + str(self.desiredHeat) + ',desiredCool=' + str(self.desiredCool) + ',desiredTemperature=' + str(self.desiredTemperature)
+            influxdb_field_set = 'occupancy=' + str(thermostat_occup) + ',hvacMode=' + str(hvacModeToInt(self.hvacMode)) + ',desiredHeat=' + str(self.desiredHeat) + ',desiredCool=' + str(self.desiredCool) + ',desiredTemperature=' + str(self.desiredTemperature)
             influxdb_timestamp = str(int(sensor_ts)) + '000000000'
 
             returnValue += ( influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n' )
-            # returnValue += 'apidata,source=ecobee,location=Brossard,opt_format=' + self.opt_format + ',type=thermostat,mode=realtime ' + 'occupancy=' + str(thermostat_occup) + ',hvacMode=' + str(self.hvacModeToInt(self.hvacMode)) + ',desiredHeat=' + str(self.desiredHeat) + ',desiredCool=' + str(self.desiredCool) + ',desiredTemperature=' + str(self.desiredTemperature) + ' ' + str(int(sensor_ts)) + '000000000' + '\n'
-
 
         return Response(returnValue, mimetype='text/xml')
 
 
 
-    # """TODO finish"""
-    # def get_extended_runtime(self, index: int):
-    #     """ Return the extended runtime for a thermostat """
-
-    #     # Retrieve settings:
-    #     # The number of cool stages the connected HVAC equipment supports.
-    #     coolStages = int(self.thermostats[index]['settings']['coolStages'])
-
-    #     # The number of heat stages the connected HVAC equipment supports.
-    #     heatStages = int(self.thermostats[index]['settings']['heatStages'])
-
-    #     # Whether the thermostat is controlling a heat pump.
-    #     hasHeatPump = bool(self.thermostats[index]['settings']['hasHeatPump'])
-
-    #     # Whether the thermostat is controlling a heat pump.
-    #     # extended_data[index]['hasHeatPump'] = self.thermostats[index]['settings']['hasHeatPump']
-
-    #     # Whether the thermostat is controlling a humidifier.
-    #     #extended_data[index]['hasHumidifier'] = self.thermostats[index]['settings']['hasHumidifier']
-    #     hasHumidifier = bool(self.thermostats[index]['settings']['hasHumidifier'])
-
-    #     last_ts_str = self.thermostats[index]['extendedRuntime']['lastReadingTimestamp']
-    #     last_ts = self.ts_utc_from_datestr(last_ts_str)
-
-    #     extended_data[index]['tstamps'] = [last_ts - 600, last_ts - 300, last_ts]
-
-    #     # get temperature values
-    #     # The last three 5 minute actual temperature readings
-    #     # vals = self.thermostats[index]['extendedRuntime']['actualTemperature']
-    #     # actualTemperature = [val / 10.0 for val in vals]   # they are expressed in tenths, so convert
-    #     # extended_data[index]['actualTemperature'] = actualTemperature
-      
-    #     # get Humidity values
-    #     # actualHumidity = self.thermostats[index]['extendedRuntime']['actualHumidity']
-       
-    #     # get heating setpoints
-    #     # desired heat temperature readings.
-    #     # vals = self.thermostats[index]['extendedRuntime']['desiredHeat']
-    #     # desiredHeat = [val / 10.0 for val in vals]  # they are expressed in tenths, so convert
-        
-    #     # get cooling setpoints
-    #     # vals = self.thermostats[index]['extendedRuntime']['desiredCool']
-    #     # desiredCool = [val / 10.0 for val in vals]  # they are expressed in tenths, so convert
-        
-    #     # get humidity setpoints
-    #     # The last three 5 minute desired humidity readings.
-    #     # desiredHumidity = self.thermostats[index]['extendedRuntime']['desiredHumidity']
-              
-    #     # get de-humidity setpoints
-    #     # The last three 5 minute desired de-humidification readings.
-    #     # desiredDehumidity = self.thermostats[index]['extendedRuntime']['desiredDehumidity']
-
-
-    #     #  This value corresponds to the heat pump stage 1 runtime.
-    #     if (hasHeatPump = True):
-    #         vals = self.thermostats[index]['extendedRuntime']['heatPump1']
-    #         # The last three 5 minute HVAC Runtime values in seconds (0-300 seconds) per interval.
-    #         # heatPump1 = [val / 300.0 for val in vals]
-    #         # self.heatPump1_sum = sum(heatPump1) / 3
-    #         extended_data[index]['heatPump1'] = [val / 300.0 for val in vals]
-
-    #         # This value corresponds to the heat pump stage 2 runtime.
-    #         if (heatStages >= 2):
-    #             vals = self.thermostats[index]['extendedRuntime']['heatPump2']
-    #             # The last three 5 minute HVAC Runtime values in seconds (0-300 seconds) per interval.
-    #             # heatPump2 = [val / 300.0 for val in vals]
-    #             # self.heatPump2_sum = sum(heatPump2) / 3
-    #             extended_data[index]['heatPump2'] = [val / 300.0 for val in vals]
-
-    #     # This value corresponds to the auxiliary heat stage 1. If the thermostat does not have a heat pump, this is heat stage 1.
-    #     vals = self.thermostats[index]['extendedRuntime']['auxHeat1']
-    #     # The last three 5 minute HVAC Runtime values in seconds (0-300 seconds) per interval.
-    #     # auxHeat1 = [val / 300.0 for val in vals]
-    #     # self.auxHeat1_sum = sum(auxHeat1) / 3
-    #     extended_data[index]['auxHeat1'] = [val / 300.0 for val in vals]
-       
-    #     if (heatStages >= 2):
-    #         # This value corresponds to the auxiliary heat stage 2. If the thermostat does not have a heat pump, this is heat stage 2.
-    #         vals = self.thermostats[index]['extendedRuntime']['auxHeat2']
-    #         # The last three 5 minute HVAC Runtime values in seconds (0-300 seconds) per interval.
-    #         # auxHeat2 = [val / 300.0 for val in vals]
-    #         # self.auxHeat2_sum = sum(auxHeat2) / 3
-    #         extended_data[index]['auxHeat2'] = [val / 300.0 for val in vals]
-
-    #     if (heatStages == 3):
-    #         # This value corresponds to the heat stage 3 if the thermostat does not have a heat pump. Auxiliary stage 3 is not supported.
-    #         vals = self.thermostats[index]['extendedRuntime']['auxHeat3']
-    #         # The last three 5 minute HVAC Runtime values in seconds (0-300 seconds) per interval.
-    #         # auxHeat3 = [val / 300.0 for val in vals]
-    #         # self.auxHeat3_sum = sum(auxHeat3) / 3
-    #         extended_data[index]['auxHeat3'] = [val / 300.0 for val in vals]
-
-
-
-    #     if (coolStages >= 1):
-    #         # Runtime values (0-300 seconds) of cooling stage 1
-    #         vals = self.thermostats[index]['extendedRuntime']['cool1']
-    #         # The last three 5 minute HVAC Runtime values in seconds (0-300 seconds) per interval.
-    #         # cool1 = [val / 300.0 for val in vals]
-    #         # self.cool1_sum = sum(cool1) / 3
-    #         extended_data[index]['cool1'] = [val / 300.0 for val in vals]
-
-    #     if (coolStages >= 2):
-    #         # Runtime values (0-300 seconds) of cooling stage 2
-    #         vals = self.thermostats[index]['extendedRuntime']['cool2']
-    #         # The last three 5 minute HVAC Runtime values in seconds (0-300 seconds) per interval.
-    #         # cool2 = [val / 300.0 for val in vals]
-    #         # self.cool2_sum = sum(cool2) / 3
-    #         extended_data[index]['cool2'] = [val / 300.0 for val in vals]
-        
-    #     # Runtime values (0-300 seconds) of cooling stage 1
-    #     vals = self.thermostats[index]['extendedRuntime']['fan']
-    #     # The last three 5 minute HVAC Runtime values in seconds (0-300 seconds) per interval.
-    #     # fan = [val / 300.0 for val in vals]
-    #     # self.fan_sum = sum(fan) / 3
-    #     extended_data[index]['fan'] = [val / 300.0 for val in vals]
-
-    #     # returnValue = ''
-
-    #     # for x in range(0, 3):
-    #         # returnValue +=  str(actualTemperature[x]) 
-
-
-
-
-
-
-
-
-
-    # # Possible values: auto, auxHeatOnly, cool, heat, off.
-    # @staticmethod
-    # def hvacModeToInt(hvacMode):
-    #     if hvacMode == 'auto':
-    #         return 1
-    #     elif hvacMode == 'auxHeatOnly':
-    #         return 2
-    #     elif hvacMode == 'cool':
-    #         return 3
-    #     elif hvacMode == 'heat':
-    #         return 4
-    #     elif hvacMode == 'off':
-    #         return 5
-    #     return -1
-
-
-
 class ExtendedRuntimeClass(Resource):
+    '''Class to get the Extended Runtime.'''
     def get(self):
-
-        # return ecobeeThermostat.getExtendedRuntime
         thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
         thermostat.read_config_from_file()
         try:
             thermostat.get_thermostats()
-        except (ExpiredTokenError):
+        except (ExpiredTokenError) as err:
+            logger.error("Token was expired.")
             returnValue = thermostat.refresh_tokens()
             thermostat._write_config()
             thermostat.get_thermostats()
 
         return thermostat.getExtendedRuntime(0)
-        # return thermostat.get_extended_runtime(0)
-        # return jsonify(thermostat.get_thermostat(0))
 
 
 class RuntimeClass(Resource):
+    '''Class to extract the Runtime and Remote Sensors data.'''
     def get(self):
         thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
         thermostat.read_config_from_file()
         try:
             thermostat.get_thermostats()
-        except (ExpiredTokenError):
+        except (ExpiredTokenError) as err:
+            logger.error("Token was expired.")
             returnValue = thermostat.refresh_tokens()
             thermostat._write_config()
             thermostat.get_thermostats()
 
-        ###### return thermostat.getRuntimeAndRemoteSensors(0)
         return thermostat.getRuntimeAndRemoteSensors(0)
 
 
-class EcobeeThermostatRequestTokens(Resource):
+class EcobeeThermostatRefreshTokens(Resource):
+    '''Class to Refresh the Token.'''
     def get(self):
         thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
         thermostat.read_config_from_file()
@@ -954,6 +374,7 @@ class EcobeeThermostatRequestTokens(Resource):
 
 
 class EcobeeThermostatRequestPin(Resource):
+    '''Class to request a new PIN. Check the Debug log for the PIN.'''
     def get(self):
         thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
         thermostat.read_config_from_file()
@@ -976,8 +397,7 @@ class EcobeeThermostatRequestPin(Resource):
 
 
 class EcobeeThermostatApiKey(Resource):
-    # 'Please enter the API key obtained from ecobee.com.'
-
+    '''Class to enter a new API Key'''
 
     def get(self,api_key):
         thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
@@ -992,7 +412,7 @@ api.add_resource(EcobeeThermostatApiKey, '/thermostat/ecobee/apiKey/<api_key>')
 api.add_resource(ExtendedRuntimeClass, '/thermostat/ecobee/resource/extended-runtime')
 api.add_resource(RuntimeClass, '/thermostat/ecobee/resource/runtime')
 
-api.add_resource(EcobeeThermostatRequestTokens, '/thermostat/ecobee/token/request')
+api.add_resource(EcobeeThermostatRefreshTokens, '/thermostat/ecobee/token/request')
 api.add_resource(EcobeeThermostatRequestPin, '/thermostat/ecobee/pin/request')
 
 

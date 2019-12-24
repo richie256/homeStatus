@@ -16,3 +16,18 @@ def ts_utc_from_datestr(utc_date_str):
 
     # return calendar.timegm(dt.utctimetuple())
     return utc.timestamp()
+
+# Possible values: auto, auxHeatOnly, cool, heat, off.
+def hvacModeToInt(hvacMode):
+    if hvacMode == 'auto':
+        return 1
+    elif hvacMode == 'auxHeatOnly':
+        return 2
+    elif hvacMode == 'cool':
+        return 3
+    elif hvacMode == 'heat':
+        return 4
+    elif hvacMode == 'off':
+        return 5
+    return -1
+
