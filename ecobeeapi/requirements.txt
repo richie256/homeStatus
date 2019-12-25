@@ -1,4 +1,4 @@
-Flask==1.0
+Flask==1.1.1
 flask-restful==0.3.6
 python-ecobee-api==0.2.1
 python-dateutil==2.7.2

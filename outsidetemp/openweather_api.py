@@ -10,9 +10,8 @@ from flask_restful import Resource, Api
 # import urllib2
 from urllib.request import urlopen
 
-#import datetime, time
-#import pytz
 import json
+import time
 
 from dateutil import tz
 import calendar
@@ -120,6 +119,7 @@ class OutsideTemp(Resource):
 
     def getOutsideInfos(self, location_id):
         #Initialize
+        self.success_result = True
         openweathermap = None
         iconnected=False
 
@@ -183,11 +183,20 @@ class OutsideTemp(Resource):
 
     def get(self,location_id):
         logger.info('Receive a request. location_id: ' + str(location_id))
+        count = 0
+        self.success_result = False
 
-        self.getOutsideInfos(location_id)
+        while (not self.success_result):
+            self.getOutsideInfos(location_id)
+
+            count += 1
+            if (count >= 3) or (self.success_result == True):
+                break
+            else:
+                time.sleep(3)
 
         if (not self.success_result):
-            return None
+            abort(500)
 
         # JSON Format
         if self.opt_format == self.CONST_JSON:
