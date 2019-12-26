@@ -430,7 +430,7 @@ class EcobeeThermostatRequestPin(Resource):
         message="Error"
 
         returnValuePin = thermostat.request_pin()
-        if returnValue:
+        if returnValuePin:
             returnValueToken = thermostat.request_tokens()
 
         if returnValuePin or returnValueToken:
