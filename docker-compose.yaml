@@ -8,12 +8,30 @@ services:
     ports:
       - 5001:80
 
+  # redis-cache:
+  #   image: redis:latest
+  #   volumes:
+  #     - redis.conf:/usr/local/etc/redis/redis.conf
+  #   command: redis redis-server /usr/local/etc/redis/redis.con
+    # expose:
+    #   - 6379
+
+  # docker run --name some-redis -d redis   
+  redis-cache:
+    image: redis:latest
+    # volumes:
+    #   - redis.conf:/usr/local/etc/redis/redis.conf
+    # command: redis redis-server /usr/local/etc/redis/redis.con
+
+
   ecobee-service:
     build: ./ecobeeapi
     volumes:
       - ./ecobeeapi:/usr/src/app
     ports:
       - 5002:80
+    depends_on:
+      - redis-cache
 
   # docker run --cap-add=IPC_LOCK -e 'VAULT_DEV_ROOT_TOKEN_ID=myroot' -e 'VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:1234' vault
   # docker run --cap-add=IPC_LOCK -e 'VAULT_LOCAL_CONFIG={"backend": {"file": {"path": "/vault/file"}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h"}' vault server
@@ -92,6 +110,12 @@ services:
       - influxdb
       - outsidetemp-service
       - ecobee-service
+
+  # MQTT_USERNAME=mqtt_username MQTT_PASSWORD=mqtt_password MQTT_HOST=mqtt_ip MQTT_PORT=mqtt_port CONFIG=config.yaml PYHQ_OUTPUT=MQTT registry.gitlab.com/ttblt-hass/pyhydroquebec:master
+  mqtt_pyhydroquebec:
+    image: registry.gitlab.com/ttblt-hass/pyhydroquebec:master
+    env_file:
+      mqtt-pyhydroquebec-variables.env
 
   grafana:
     image: grafana/grafana

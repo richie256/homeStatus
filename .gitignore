@@ -1,7 +1,29 @@
 .DS_Store
-influxdb-variables.env
 outsidetemp/openweather-vars.json
 outsidetemp/openweather.log
 ecobeeapi/ecobee.log
 ecobeeapi/ecobee.conf
+influxdb-variables.env
+mqtt-pyhydroquebec-variables.env
+pyhydroquebec_config.yaml
 
+# Secret files!! #
+##################
+homeassistant_config/secret.yaml
+homeassistant_config/plex.conf
+
+# Home Assistant generated files #
+##################################
+homeassistant_config/.HA_VERSION
+homeassistant_config/.uuid
+homeassistant_config/.storage/
+homeassistant_config/tts/
+
+# Logs and databases #
+######################
+homeassistant_config/home-assistant.log
+homeassistant_config/home-assistant*.db
+
+# List of known devices #
+#########################
+homeassistant_config/known_devices.yaml

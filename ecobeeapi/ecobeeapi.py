@@ -9,6 +9,8 @@ from flask import Flask, abort, Response, jsonify, request
 import requests
 import json
 import time
+import redis
+from redis.exceptions import LockError
 
 from requests.exceptions import RequestException
 
@@ -28,10 +30,10 @@ from util import toFarenheit, toCelsius, ts_utc_from_datestr, hvacModeToInt
 # create logger with 'ecobee_application'
 logger = logging.getLogger('pyecobee')
 
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.DEBUG)
 # create file handler which logs even debug messages
 fh = logging.FileHandler('ecobee.log')
-fh.setLevel(logging.DEBUG)
+fh.setLevel(logging.ERROR)
 # create console handler with a higher log level
 ch = logging.StreamHandler()
 ch.setLevel(logging.ERROR)
@@ -93,7 +95,6 @@ class EcobeeEnhanced(Ecobee):
         self.api_key = api_key
 
         return self._write_config();
-
 
     def getExtendedRuntime(self, index):
         '''Class to get the Extended Runtime.'''
@@ -209,7 +210,7 @@ class EcobeeEnhanced(Ecobee):
     def getRuntimeAndRemoteSensors(self, index):
         '''Class to extract the Runtime and Remote Sensors data.'''
 
-        occupval = 0
+        # occupval = 0
 
         stat_id = str(self.thermostats[index]['identifier']) + '_'
 
@@ -236,6 +237,8 @@ class EcobeeEnhanced(Ecobee):
         val = self.thermostats[index]['runtime']['desiredCool']
         self.desiredCool = round(toCelsius(val / 10.0),2)
 
+        # thermostat_actualTemperature = round(toCelsius(int(self.thermostats[index]['runtime']['actualTemperature']) / 10.0),2)
+        # thermostat_actualHumidity = self.thermostats[index]['runtime']['actualHumidity']
 
         if self.hvacMode == 'cool':
             self.desiredTemperature = self.desiredCool
@@ -251,18 +254,16 @@ class EcobeeEnhanced(Ecobee):
             # variables determining whether we will store particular types of readings
             # for this sensor.
 
-            use_temp = False
-            use_occupancy = False
+            # use_temp = False
+            # use_occupancy = False
             sens_id = ''        # the ID prefix to use for this sensor
             if sensor['type'] == 'ecobee3_remote_sensor':
                 use_temp = True
-                # use_occupancy = self.include_occupancy
                 sens_id = '%s%s' % (stat_id, str(sensor['code']))
                 name = sensor['name']
 
             elif sensor['type'] == 'thermostat':
                 # use_temp = False    # we already gathered temperature for the main thermostat
-                # use_occupancy = self.include_occupancy
                 sens_id = stat_id
 
             # loop through reading types of this sensor and store the requested ones
@@ -280,7 +281,7 @@ class EcobeeEnhanced(Ecobee):
                         # remote_temp = float(capability['value'])/10.0
                     elif sensor['type'] == 'thermostat':
                         pass
-                elif capability['type'] == 'occupancy' and use_occupancy:
+                elif capability['type'] == 'occupancy':
                     occupval = 1 if capability['value'] == 'true' else 0
                     # readings.append((sensor_ts, sens_id + 'occup', val))
                     # if sensor['type'] == 'ecobee3_remote_sensor':
@@ -312,13 +313,12 @@ class EcobeeEnhanced(Ecobee):
                 returnValue += ( influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n' )
 
         # Thermostat
-        if tempval != -999:
-            influxdb_measurement = 'apidata'
-            influxdb_tag_set = 'source=ecobee,location=Brossard,opt_format=' + self.opt_format + ',type=thermostat,mode=realtime'
-            influxdb_field_set = 'occupancy=' + str(thermostat_occup) + ',hvacMode=' + str(hvacModeToInt(self.hvacMode)) + ',desiredHeat=' + str(self.desiredHeat) + ',desiredCool=' + str(self.desiredCool) + ',desiredTemperature=' + str(self.desiredTemperature)
-            influxdb_timestamp = str(int(sensor_ts)) + '000000000'
+        influxdb_measurement = 'apidata'
+        influxdb_tag_set = 'source=ecobee,location=Brossard,opt_format=' + self.opt_format + ',type=thermostat,mode=realtime'
+        influxdb_field_set = 'occupancy=' + str(thermostat_occup) + ',hvacMode=' + str(hvacModeToInt(self.hvacMode)) + ',desiredHeat=' + str(self.desiredHeat) + ',desiredCool=' + str(self.desiredCool) + ',desiredTemperature=' + str(self.desiredTemperature)
+        influxdb_timestamp = str(int(sensor_ts)) + '000000000'
 
-            returnValue += ( influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n' )
+        returnValue += ( influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n' )
 
         return Response(returnValue, mimetype='text/xml')
 
@@ -327,25 +327,35 @@ class EcobeeEnhanced(Ecobee):
 class ExtendedRuntimeClass(Resource):
     '''Class to get the Extended Runtime.'''
     def get(self):
-        thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
-        thermostat.read_config_from_file()
-        thermostatFetch = False
-        count = 0
+
+        self.r = redis.Redis(host='redis-cache', port=6379, db=0)
 
         while True:
             try:
-                thermostatFetch = thermostat.get_thermostats()
-            except (ExpiredTokenError) as err:
-                logger.error("Token was expired.")
-                returnValue = thermostat.refresh_tokens()
-                thermostat._write_config()
-                thermostatFetch = thermostat.get_thermostats()
 
-            count += 1
-            if (count >= 3) or (thermostatFetch == True):
-                break
-            else:
-                time.sleep(3)
+                with self.r.lock('ecobee-acquire-key', blocking_timeout=10) as lock:
+                    # code you executed only after the lock has been acquired
+                    thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
+                    thermostat.read_config_from_file()
+                    thermostatFetch = False
+                    count = 0
+
+                    try:
+                        thermostatFetch = thermostat.get_thermostats()
+                    except (ExpiredTokenError) as err:
+                        logger.error("Token was expired.")
+                        returnValue = thermostat.refresh_tokens()
+                        thermostat._write_config()
+                        thermostatFetch = thermostat.get_thermostats()
+                    count += 1
+                    if (count >= 3) or (thermostatFetch == True):
+                        break
+                    else:
+                        time.sleep(1)
+
+            except LockError:
+                # the lock wasn't acquired
+                time.sleep(1)
 
         if thermostatFetch == False:
             abort(500)
@@ -356,25 +366,37 @@ class ExtendedRuntimeClass(Resource):
 class RuntimeClass(Resource):
     '''Class to extract the Runtime and Remote Sensors data.'''
     def get(self):
-        thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
-        thermostat.read_config_from_file()
-        thermostatFetch = False
-        count = 0
+
+        self.r = redis.Redis(host='redis-cache', port=6379, db=0)
 
         while True:
-            try:
-                thermostatFetch = thermostat.get_thermostats()
-            except (ExpiredTokenError) as err:
-                logger.error("Token was expired.")
-                returnValue = thermostat.refresh_tokens()
-                thermostat._write_config()
-                thermostatFetch = thermostat.get_thermostats()
 
-            count += 1
-            if (count >= 3) or (thermostatFetch == True):
-                break
-            else:
-                time.sleep(3)
+            try:
+                with self.r.lock('ecobee-acquire-key', blocking_timeout=10) as lock:
+                    # code you executed only after the lock has been acquired
+                    thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
+                    thermostat.read_config_from_file()
+                    thermostatFetch = False
+                    count = 0
+
+                    # code you want executed only after the lock has been acquired
+                    try:
+                        thermostatFetch = thermostat.get_thermostats()
+                    except (ExpiredTokenError) as err:
+                        logger.error("Token was expired.")
+                        returnValue = thermostat.refresh_tokens()
+                        thermostat._write_config()
+                        thermostatFetch = thermostat.get_thermostats()
+                    count += 1
+                    if (count >= 3) or (thermostatFetch == True):
+                        break
+                    else:
+                        time.sleep(1)
+
+            except LockError:
+                logger.error("Ecobee acquire was locked.")
+                # the lock wasn't acquired
+                time.sleep(1)
 
         if thermostatFetch == False:
             abort(500)

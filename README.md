@@ -52,8 +52,6 @@ Please choose the proper subscription http://openweathermap.org/price"
 
 # Ecobee thermostat
 
-- [ ] ~~Incorporate changes in python-ecobee-api~~
-- [ ] ~~merge the fork~~
 - [x] Adapt the code using the new python-ecobee-api
 - [x] Code optimisation
 - [x] Fully test expired tokens
@@ -70,7 +68,7 @@ docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d homeassis
 
 docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d outsidetemp-service
 
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d outsidetemp-service ecobee-service influxdb telegraf grafana
+docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d outsidetemp-service redis-cache ecobee-service influxdb telegraf grafana
 
 cd projects/homeStatus
 docker-compose -f docker-compose.yaml up -d outsidetemp-service ecobee-service influxdb telegraf grafana
