@@ -14,6 +14,8 @@ from redis.exceptions import LockError
 
 from requests.exceptions import RequestException
 
+from io import StringIO
+import csv
 
 from flask_restful import Resource, Api
 
@@ -203,6 +205,64 @@ class EcobeeEnhanced(Ecobee):
             influxdb_timestamp = str(int(tstamps[x])) + '000000000' 
 
             returnValue += ( influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n' )
+
+        return Response(returnValue, mimetype='text/xml')
+
+
+
+    def getRunningEquipments(self, index):
+        '''Class to retrieve the running equipments.'''
+
+        # Requires runtime, settings and equipmentStatus.
+
+        equipmentList = ['heatPump', 'heatPump2', 'heatPump3', 'compCool1', 'compCool2', 'auxHeat1', 'auxHeat2', 'auxHeat3', 'fan', 'humidifier', 'dehumidifier', 'ventilator', 'economizer', 'compHotWater', 'auxHotWater']
+
+        # Initialise the list of possible running Equipments as 0.
+        runningEquipments = dict()
+
+        for i in equipmentList:
+            runningEquipments[i] = '0'
+
+        sensor_ts_str = self.thermostats[index]['runtime']['lastStatusModified']
+        # sensor_ts_str = '2019-12-26 02:32:04'
+        sensor_ts = ts_utc_from_datestr(sensor_ts_str)
+
+        equipmentStatus = self.thermostats[index]['equipmentStatus']
+        # equipmentStatus = 'fan,heatPump'
+
+        if (equipmentStatus is not None) and (equipmentStatus != ''):
+            file_like_obj = StringIO(equipmentStatus)
+            csv_reader = csv.reader(file_like_obj, delimiter=',')
+            for row in csv_reader:
+                rowSize = len(row)
+
+                for x in range(0, len(row)):
+                    runningEquipments.update({row[x]:'1'})
+
+                break
+
+        returnValue = None
+
+        if len(runningEquipments) > 0:
+
+            queue = StringIO()
+
+            # We put them together in a single row (csv-style) without line terminator
+            writer = csv.writer(queue, lineterminator='')
+
+            #Concat the key Value
+            concat = []
+            for k,v in runningEquipments.items():
+                concat.append(k + "=" + str(v))
+
+            writer.writerow(concat)
+
+            influxdb_measurement = 'running_equipments'
+            influxdb_tag_set = 'source=ecobee,location=Brossard,opt_format=' + self.opt_format
+            influxdb_field_set = queue.getvalue()
+            influxdb_timestamp = str(int(sensor_ts)) + '000000000'
+
+            returnValue = influxdb_measurement + ',' + influxdb_tag_set + ' ' + influxdb_field_set + ' ' + influxdb_timestamp + '\n'
 
         return Response(returnValue, mimetype='text/xml')
 
@@ -401,7 +461,23 @@ class RuntimeClass(Resource):
         if thermostatFetch == False:
             abort(500)
 
-        return thermostat.getRuntimeAndRemoteSensors(0)
+
+        runtimeRsp = thermostat.getRuntimeAndRemoteSensors(0)
+        runningEquipment = thermostat.getRunningEquipments(0)
+
+        returnValue = ''
+
+        if (isinstance(runtimeRsp, Response) and (runtimeRsp.get_data(as_text=True) != '')):
+            returnValue += runtimeRsp.get_data(as_text=True)
+
+        if ((type(runningEquipment) == Response) and (runningEquipment.get_data(as_text=True) != '')):
+            returnValue += runningEquipment.get_data(as_text=True)
+
+
+        if (returnValue != ''):
+            return Response(returnValue, mimetype='text/xml')
+        else:
+            return None
 
 
 class EcobeeThermostatRequestTokens(Resource):
@@ -417,6 +493,46 @@ class EcobeeThermostatRequestTokens(Resource):
         else:
             message="Error"
         return message
+
+class EcobeeRunningEquipmentsClass(Resource):
+    '''Class to retrieve the list of running equipments.'''
+    def get(self):
+
+        self.r = redis.Redis(host='redis-cache', port=6379, db=0)
+
+        while True:
+
+            try:
+                with self.r.lock('ecobee-acquire-key', blocking_timeout=10) as lock:
+                    # code you executed only after the lock has been acquired
+                    thermostat = EcobeeEnhanced(config_filename='ecobee.conf')
+                    thermostat.read_config_from_file()
+                    thermostatFetch = False
+                    count = 0
+
+                    # code you want executed only after the lock has been acquired
+                    try:
+                        thermostatFetch = thermostat.get_thermostats()
+                    except (ExpiredTokenError) as err:
+                        logger.error("Token was expired.")
+                        returnValue = thermostat.refresh_tokens()
+                        thermostat._write_config()
+                        thermostatFetch = thermostat.get_thermostats()
+                    count += 1
+                    if (count >= 3) or (thermostatFetch == True):
+                        break
+                    else:
+                        time.sleep(1)
+
+            except LockError:
+                logger.error("Ecobee acquire was locked.")
+                # the lock wasn't acquired
+                time.sleep(1)
+
+        if thermostatFetch == False:
+            abort(500)
+
+        return thermostat.getRunningEquipments(0)
 
 
 class EcobeeThermostatRequestPin(Resource):
@@ -457,6 +573,8 @@ api.add_resource(EcobeeThermostatApiKey, '/thermostat/ecobee/apiKey/<api_key>')
 
 api.add_resource(ExtendedRuntimeClass, '/thermostat/ecobee/resource/extended-runtime')
 api.add_resource(RuntimeClass, '/thermostat/ecobee/resource/runtime')
+
+api.add_resource(EcobeeRunningEquipmentsClass, '/thermostat/ecobee/equipments/running')
 
 api.add_resource(EcobeeThermostatRequestTokens, '/thermostat/ecobee/token/request')
 api.add_resource(EcobeeThermostatRequestPin, '/thermostat/ecobee/pin/request')

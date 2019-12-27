@@ -55,23 +55,32 @@ Please choose the proper subscription http://openweathermap.org/price"
 - [x] Adapt the code using the new python-ecobee-api
 - [x] Code optimisation
 - [x] Fully test expired tokens
+- [ ] Add equipmentStatus.
+- [ ] Remove the `docker-compose.arm.yaml` file.
 
 ## How to update ecobee config
 - Log into your Ecobee account and create a new API under Developer.
-- Using the API Key, call the `curl http://localhost:5002/thermostat/ecobee/apiKey/<api_key>`
+- Using the API Key, \ncall the `curl http://localhost:5002/thermostat/ecobee/apiKey/<api_key>`
 - Put the logs in Debug Mode.
 - Request a new pin: `curl http://localhost:5002/thermostat/ecobee/pin/request` then retrieve the PIN from the Debug logs.
-- Enter the PIN in your Ecobee Account, then request the token: `curl http://localhost:5002/thermostat/ecobee/token/request`
+- Enter the PIN in your Ecobee Account, \nthen request the token: `curl http://localhost:5002/thermostat/ecobee/token/request`
 
 # To execute:
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d homeassistant
+docker-compose -f docker-compose.yaml up -d homeassistant
 
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d outsidetemp-service
+docker-compose -f docker-compose.yaml up -d outsidetemp-service
 
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d outsidetemp-service redis-cache ecobee-service influxdb telegraf grafana
+docker-compose -f docker-compose.yaml up -d redis-cache ecobee-service outsidetemp-service influxdb telegraf grafana
+
+
 
 cd projects/homeStatus
 docker-compose -f docker-compose.yaml up -d outsidetemp-service ecobee-service influxdb telegraf grafana
+
+
+equipmentStatus
+The status of all equipment controlled by this Thermostat. Only running equipment is listed in the CSV String.
+Values: heatPump, heatPump2, heatPump3, compCool1, compCool2, auxHeat1, auxHeat2, auxHeat3, fan, humidifier, dehumidifier, ventilator, economizer, compHotWater, auxHotWater.
 
 
 
@@ -81,6 +90,7 @@ curl http://localhost:5002/thermostat/ecobee/resource/extended-runtime?format=in
 
 curl http://localhost:5001/conditions/5909629?format=influx
 
+curl http://localhost:5002/thermostat/ecobee/equipments/running?format=influx
 
 
 If I want to test the vault outside a container: I do (for example): http://localhost:8200/v1/sys/seal-status
