@@ -122,7 +122,7 @@ services:
     ports:
       - 0.0.0.0:3000:3000
     environment:
-      GF_INSTALL_PLUGINS: "natel-discrete-panel,fatcloud-windrose-panel"
+      GF_INSTALL_PLUGINS: "natel-discrete-panel,fatcloud-windrose-panel,vonage-status-panel"
     volumes:
       - grafana:/var/lib/grafana
     depends_on:
