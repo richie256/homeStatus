@@ -1,0 +1,20 @@
+- alias: SousSol_Atelier on
+  trigger:
+    platform: state
+    entity_id: binary_sensor.atelier_motion
+    to: 'on'
+  action:
+    service: homeassistant.turn_on
+    entity_id: light.hue_color_lamp_1
+- alias: Reset SousSol_Atelier state
+  hide_entity: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.atelier_motion
+      to: 'off'
+      for:
+        minutes: 5
+  action:
+    service: homeassistant.turn_off
+    entity_id: light.hue_color_lamp_1
+

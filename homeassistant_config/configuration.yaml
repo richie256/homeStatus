@@ -73,8 +73,14 @@ wemo:
   static:
     - !secret wemo_ipaddress
 
+hue:
+  bridges:
+    - host: !secret hue_bridge_ipaddress
+
 # Sensors
 sensor: !include_dir_merge_list includes/sensors/
+
+binary_sensor: !include_dir_merge_list includes/binary_sensors/
 
 # Text to speech
 tts:
@@ -112,7 +118,9 @@ automation: !include_dir_merge_list yaml_automation/
 zone: !include zones.yaml
 group: !include includes/group/group.hydroquebec.yaml
 
+mqtt:
+  broker: localhost
+  username: !secret mqtt_username
+  password: !secret mqtt_password
 
-
-
-
+automation: !include automations/soussol_atelier.yaml

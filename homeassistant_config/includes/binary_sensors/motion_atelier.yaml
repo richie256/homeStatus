@@ -1,0 +1,9 @@
+  - platform: mqtt
+    state_topic: "tele/sonoff/RESULT"
+    name: "atelier_motion"
+    value_template: '{{value_json.RfReceived.Data}}'
+    payload_on: "E6DD5E"
+    payload_off: "E6DD5EOff"
+    device_class: motion
+    qos: 0
+

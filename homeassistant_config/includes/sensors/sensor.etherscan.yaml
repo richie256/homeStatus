@@ -1,3 +1,0 @@
-# Example configuration.yaml entry
-  - platform: etherscan
-    address: !secret eth_wallet
