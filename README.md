@@ -20,7 +20,10 @@ Incorporate Ultrasonic distance.
 # MQTT
 Configure the MQTT
 
-mosquitto seems to take 100% of processor... disabled for now
+- Install the mosquitto on linux `apt-get install mosquitto`
+- Configure the password file: https://mosquitto.org/man/mosquitto_passwd-1.html
+- Add a new password: `mosquitto_passwd -c mosquitto_passwd <usrrname>`
+
 
 # Outside temps from openweathermap.org
 
@@ -61,10 +64,10 @@ Please choose the proper subscription http://openweathermap.org/price"
 
 ## How to update ecobee config
 - Log into your Ecobee account and create a new API under Developer.
-- Using the API Key, \ncall the `curl http://localhost:5002/thermostat/ecobee/apiKey/<api_key>`
+- Using the API Key, call the `curl http://localhost:5002/thermostat/ecobee/apiKey/<api_key>`
 - Put the logs in Debug Mode.
 - Request a new pin: `curl http://localhost:5002/thermostat/ecobee/pin/request` then retrieve the PIN from the Debug logs.
-- Enter the PIN in your Ecobee Account, \nthen request the token: `curl http://localhost:5002/thermostat/ecobee/token/request`
+- Enter the PIN in your Ecobee Account, then request the token: `curl http://localhost:5002/thermostat/ecobee/token/request`
 
 # To execute:
 docker-compose -f docker-compose.yaml up -d homeassistant
@@ -73,6 +76,7 @@ docker-compose -f docker-compose.yaml up -d outsidetemp-service
 
 docker-compose -f docker-compose.yaml up -d redis-cache ecobee-service outsidetemp-service influxdb telegraf grafana
 
+docker-compose -f docker-compose.yaml up -d eclipse-mosquitto
 
 
 cd projects/homeStatus
