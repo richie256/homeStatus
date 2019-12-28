@@ -8,14 +8,6 @@ services:
     ports:
       - 5001:80
 
-  # redis-cache:
-  #   image: redis:latest
-  #   volumes:
-  #     - redis.conf:/usr/local/etc/redis/redis.conf
-  #   command: redis redis-server /usr/local/etc/redis/redis.con
-    # expose:
-    #   - 6379
-
   # docker run --name some-redis -d redis   
   redis-cache:
     image: redis:latest
@@ -60,15 +52,18 @@ services:
   #  environment:
   #    - CAPTURE_DURATION=10
 
-  #eclipse-mosquitto:
-  #  container_name: eclipse-mosquitto
-  #  image: eclipse-mosquitto
-  #  ports:
-  #    - 1883:1883
-  #    - 9001:9001
-  #  volumes:
-  #    - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
-  #    - ./mosquitto_passwd:/etc/mosquitto/passwd
+  eclipse-mosquitto:
+    container_name: eclipse-mosquitto
+    image: eclipse-mosquitto:latest
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto_passwd:/etc/mosquitto/passwd:ro
+      - eclipse-mosquito-data:/mosquitto/data
+      - eclipse-mosquito-log:/mosquitto/log
+      # - ./mosquitto.log:/mosquitto/log/mosquitto.log:rw
 
   homeassistant:
     container_name: home-assistant
@@ -134,6 +129,10 @@ volumes:
   grafana:
     driver: local
   videocap:
+    driver: local
+  eclipse-mosquito-data:
+    driver: local
+  eclipse-mosquito-log:
     driver: local
 
 
