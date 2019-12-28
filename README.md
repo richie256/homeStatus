@@ -57,6 +57,7 @@ Please choose the proper subscription http://openweathermap.org/price"
 - [x] Fully test expired tokens
 - [ ] Add equipmentStatus.
 - [ ] Remove the `docker-compose.arm.yaml` file.
+- [ ] Integrate desired temperature.
 
 ## How to update ecobee config
 - Log into your Ecobee account and create a new API under Developer.
