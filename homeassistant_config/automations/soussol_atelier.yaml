@@ -1,4 +1,5 @@
 - alias: SousSol_Atelier on
+  hide_entity: true
   initial_state: 'on'
   trigger:
     platform: state
@@ -35,4 +36,19 @@
     - service: mqtt.publish
       data:
         topic: tele/sonoff/RESULT
-        payload_template: "{\"RfReceived\": {\"Data\": \"E6DD5Eoff\"}}"
+        payload_template: "{\"RfReceived\": {\"Data\": \"E6DD5EOff\"}}"
+
+- alias: SousSol_Atelier on lillbee
+  hide_entity: true
+  initial_state: 'on'
+  trigger:
+    - plateform: state
+      entity_id: binary_sensor.lil_bee_occupancy
+      to: 'on'
+  action:
+    - service: homeassistant.turn_on
+      entity_id: light.hue_color_lamp_1
+    - service: mqtt.publish
+      data:
+        topic: tele/sonoff/RESULT
+        payload_template: "{\"RfReceived\": {\"Data\": \"E6DD5E\"}}"
