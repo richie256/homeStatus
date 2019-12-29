@@ -4,8 +4,10 @@ outsidetemp/openweather.log
 ecobeeapi/ecobee.log
 ecobeeapi/ecobee.conf
 influxdb-variables.env
-mqtt-pyhydroquebec-variables.env
+
 pyhydroquebec_config.yaml
+pyhydroquebec-variables.env
+pyhydroquebec/
 
 __pycache__/
 
