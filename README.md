@@ -20,7 +20,10 @@ Incorporate Ultrasonic distance.
 # MQTT
 Configure the MQTT
 
-mosquitto seems to take 100% of processor... disabled for now
+- Install the mosquitto on linux `apt-get install mosquitto`
+- Configure the password file: https://mosquitto.org/man/mosquitto_passwd-1.html
+- Add a new password: `mosquitto_passwd -c mosquitto_passwd <usrrname>`
+
 
 # Outside temps from openweathermap.org
 
@@ -52,11 +55,12 @@ Please choose the proper subscription http://openweathermap.org/price"
 
 # Ecobee thermostat
 
-- [ ] ~~Incorporate changes in python-ecobee-api~~
-- [ ] ~~merge the fork~~
 - [x] Adapt the code using the new python-ecobee-api
 - [x] Code optimisation
 - [x] Fully test expired tokens
+- [ ] Add equipmentStatus.
+- [ ] Remove the `docker-compose.arm.yaml` file.
+- [ ] Integrate desired temperature.
 
 ## How to update ecobee config
 - Log into your Ecobee account and create a new API under Developer.
@@ -66,14 +70,22 @@ Please choose the proper subscription http://openweathermap.org/price"
 - Enter the PIN in your Ecobee Account, then request the token: `curl http://localhost:5002/thermostat/ecobee/token/request`
 
 # To execute:
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d homeassistant
+docker-compose -f docker-compose.yaml up -d homeassistant
 
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d outsidetemp-service
+docker-compose -f docker-compose.yaml up -d outsidetemp-service
 
-docker-compose -f docker-compose.yaml -f docker-compose.arm.yaml up -d outsidetemp-service ecobee-service influxdb telegraf grafana
+docker-compose -f docker-compose.yaml up -d redis-cache ecobee-service outsidetemp-service influxdb telegraf grafana
+
+docker-compose -f docker-compose.yaml up -d eclipse-mosquitto
+
 
 cd projects/homeStatus
 docker-compose -f docker-compose.yaml up -d outsidetemp-service ecobee-service influxdb telegraf grafana
+
+
+equipmentStatus
+The status of all equipment controlled by this Thermostat. Only running equipment is listed in the CSV String.
+Values: heatPump, heatPump2, heatPump3, compCool1, compCool2, auxHeat1, auxHeat2, auxHeat3, fan, humidifier, dehumidifier, ventilator, economizer, compHotWater, auxHotWater.
 
 
 
@@ -83,6 +95,7 @@ curl http://localhost:5002/thermostat/ecobee/resource/extended-runtime?format=in
 
 curl http://localhost:5001/conditions/5909629?format=influx
 
+curl http://localhost:5002/thermostat/ecobee/equipments/running?format=influx
 
 
 If I want to test the vault outside a container: I do (for example): http://localhost:8200/v1/sys/seal-status

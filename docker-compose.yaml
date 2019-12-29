@@ -8,12 +8,22 @@ services:
     ports:
       - 5001:80
 
+  # docker run --name some-redis -d redis   
+  redis-cache:
+    image: redis:latest
+    # volumes:
+    #   - redis.conf:/usr/local/etc/redis/redis.conf
+    # command: redis redis-server /usr/local/etc/redis/redis.con
+
+
   ecobee-service:
     build: ./ecobeeapi
     volumes:
       - ./ecobeeapi:/usr/src/app
     ports:
       - 5002:80
+    depends_on:
+      - redis-cache
 
   # docker run --cap-add=IPC_LOCK -e 'VAULT_DEV_ROOT_TOKEN_ID=myroot' -e 'VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:1234' vault
   # docker run --cap-add=IPC_LOCK -e 'VAULT_LOCAL_CONFIG={"backend": {"file": {"path": "/vault/file"}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h"}' vault server
@@ -42,15 +52,18 @@ services:
   #  environment:
   #    - CAPTURE_DURATION=10
 
-  #eclipse-mosquitto:
-  #  container_name: eclipse-mosquitto
-  #  image: eclipse-mosquitto
-  #  ports:
-  #    - 1883:1883
-  #    - 9001:9001
-  #  volumes:
-  #    - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
-  #    - ./mosquitto_passwd:/etc/mosquitto/passwd
+  eclipse-mosquitto:
+    container_name: eclipse-mosquitto
+    image: eclipse-mosquitto:latest
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto_passwd:/etc/mosquitto/passwd:ro
+      - eclipse-mosquito-data:/mosquitto/data
+      - eclipse-mosquito-log:/mosquitto/log
+      # - ./mosquitto.log:/mosquitto/log/mosquitto.log:rw
 
   homeassistant:
     container_name: home-assistant
@@ -93,12 +106,21 @@ services:
       - outsidetemp-service
       - ecobee-service
 
+  # MQTT_USERNAME=mqtt_username MQTT_PASSWORD=mqtt_password MQTT_HOST=mqtt_ip MQTT_PORT=mqtt_port CONFIG=config.yaml PYHQ_OUTPUT=MQTT registry.gitlab.com/ttblt-hass/pyhydroquebec:master
+  pyhydroquebec:
+    build: ./pyhydroquebec
+    # image: registry.gitlab.com/ttblt-hass/pyhydroquebec:master
+    volumes:
+      - ./pyhydroquebec_config.yaml:/etc/pyhydroquebec/pyhydroquebec.yaml:ro
+    env_file:
+      pyhydroquebec-variables.env
+
   grafana:
     image: grafana/grafana
     ports:
       - 0.0.0.0:3000:3000
     environment:
-      GF_INSTALL_PLUGINS: "natel-discrete-panel,fatcloud-windrose-panel"
+      GF_INSTALL_PLUGINS: "natel-discrete-panel,fatcloud-windrose-panel,vonage-status-panel,neocat-cal-heatmap-panel"
     volumes:
       - grafana:/var/lib/grafana
     depends_on:
@@ -110,6 +132,10 @@ volumes:
   grafana:
     driver: local
   videocap:
+    driver: local
+  eclipse-mosquito-data:
+    driver: local
+  eclipse-mosquito-log:
     driver: local
 
 

@@ -1,0 +1,38 @@
+- alias: SousSol_Atelier on
+  initial_state: 'on'
+  trigger:
+    platform: state
+    entity_id: binary_sensor.atelier_motion
+    to: 'on'
+  action:
+    service: homeassistant.turn_on
+    entity_id: light.hue_color_lamp_1
+
+- alias: Turn off Atelier light after 5 minutes
+  hide_entity: true
+  initial_state: 'on'
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.atelier_motion
+      from: 'on'
+      to: 'off'
+      for:
+        minutes: 5
+  action:
+    service: homeassistant.turn_off
+    entity_id: light.hue_color_lamp_1
+
+- alias: Reset SousSol_Atelier state
+  hide_entity: true
+  initial_state: 'on'
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.atelier_motion
+      to: 'on'
+      for:
+        seconds: 5
+  action:
+    - service: mqtt.publish
+      data:
+        topic: tele/sonoff/RESULT
+        payload_template: "{\"RfReceived\": {\"Data\": \"E6DD5Eoff\"}}"
