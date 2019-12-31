@@ -32,3 +32,4 @@ homeassistant_config/home-assistant*.db
 # List of known devices #
 #########################
 homeassistant_config/known_devices.yaml
+homeassistant_config/.google.token

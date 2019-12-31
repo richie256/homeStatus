@@ -1,0 +1,2294 @@
+[
+  {
+    "id": "ffc06c8d.7cb55",
+    "type": "tab",
+    "label": "Collectes",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "2224c6a8.98aaba",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "recyclage/dayLeft",
+    "topic": "collecte/recyclage/dayLeft",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1490,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "777ce6a6.6d2ab8",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "poubelles/dayLeft",
+    "topic": "collecte/poubelles/dayLeft",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1370,
+    "y": 380,
+    "wires": []
+  },
+  {
+    "id": "1d5bce90.ea2c71",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "branches/dayLeft",
+    "topic": "collecte/branches/dayLeft",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1370,
+    "y": 700,
+    "wires": []
+  },
+  {
+    "id": "cdedfb4f.c7ded8",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "residusVerts/dayLeft",
+    "topic": "collecte/residusVerts/dayLeft",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1360,
+    "y": 1060,
+    "wires": []
+  },
+  {
+    "id": "61c66d63.7e9b34",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "grosDechets/dayLeft",
+    "topic": "collecte/grosDechets/dayLeft",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1320,
+    "y": 1280,
+    "wires": []
+  },
+  {
+    "id": "2b37930f.0d6ebc",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "composte/dayLeft",
+    "topic": "collecte/composte/dayLeft",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1310,
+    "y": 1600,
+    "wires": []
+  },
+  {
+    "id": "d7860d3b.18263",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "Remaining Time",
+    "func": "var pickup = msg.data.attributes.start_time;\nvar year = parseInt(pickup.substr(0, 4));\nvar month = parseInt(pickup.substr(5, 2))-1;\nvar monthOr = parseInt(pickup.substr(5, 2));\nvar day = parseInt(pickup.substr(8, 2));\nvar hour = parseInt(pickup.substr(11, 2));\nvar min = parseInt(pickup.substr(14, 2));\nvar sec = parseInt(pickup.substr(17, 2));\nvar futureDate = new Date(year, month, day, hour, min, sec);\nvar futureDateDay = futureDate.getDay();\nvar futureDateDayText = futureDate.toLocaleString('en-us', {  weekday: 'long' });\nvar futureDateMS = futureDate.getTime();\nvar curDate = new Date()\nvar curDateMS = curDate.getTime();\nvar deltaMS = futureDateMS-curDateMS;\nvar dayLeft = Math.floor(deltaMS/(24*60*60*1000));\nvar hourLeft = Math.floor((deltaMS/(60*60*1000))-(dayLeft*24));\nvar minLeft = Math.floor((deltaMS/60000)-(dayLeft*24*60)-(hourLeft*60));\nvar msg={\"payload\": \"countdownTimer\", \"dayLeft\": dayLeft, \"hourLeft\": hourLeft, \"minLeft\": minLeft, \"weekDay\": futureDateDayText, \"futureYear\": year, \"futureMonth\": monthOr, \"futureDay\": day}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 700,
+    "y": 100,
+    "wires": [
+      [
+        "463c81a1.b2577",
+        "26426bb1.dc5b54"
+      ]
+    ]
+  },
+  {
+    "id": "1e95a201.11d9fe",
+    "type": "api-current-state",
+    "z": "ffc06c8d.7cb55",
+    "name": "Recyclage",
+    "server": "6742e097.d9796",
+    "version": 1,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is_not",
+    "override_topic": true,
+    "entity_id": "calendar.recyclage",
+    "state_type": "str",
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "blockInputOverrides": true,
+    "x": 310,
+    "y": 180,
+    "wires": [
+      [
+        "40b99ad.30c1364"
+      ]
+    ]
+  },
+  {
+    "id": "abefc3f4.d0719",
+    "type": "inject",
+    "z": "ffc06c8d.7cb55",
+    "name": "Every 5 mins",
+    "topic": "Every 5 mins",
+    "payload": "",
+    "payloadType": "str",
+    "repeat": "300",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "x": 140,
+    "y": 320,
+    "wires": [
+      [
+        "1e95a201.11d9fe",
+        "fb52f58e.ecd7f8",
+        "49f5d7b1.8ab818",
+        "a5b02409.72d048",
+        "58a2c9ee.031068",
+        "d3b6fe53.da623"
+      ]
+    ]
+  },
+  {
+    "id": "d5e29fa3.8a77c",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "weekDay",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "weekDay",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 960,
+    "y": 160,
+    "wires": [
+      [
+        "bbb11e08.95ca9"
+      ]
+    ]
+  },
+  {
+    "id": "463c81a1.b2577",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "dayLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "0",
+        "vt": "str"
+      },
+      {
+        "t": "gt",
+        "v": "0",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 950,
+    "y": 80,
+    "wires": [
+      [
+        "304fbd82.6ce042"
+      ],
+      [
+        "b6bddc4b.10598"
+      ]
+    ]
+  },
+  {
+    "id": "b6bddc4b.10598",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "To Words",
+    "func": "var msg = {\"payload\":  \"dans \"+(msg.dayLeft+1)+\" jours\"}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 1130,
+    "y": 120,
+    "wires": [
+      [
+        "2224c6a8.98aaba"
+      ]
+    ]
+  },
+  {
+    "id": "304fbd82.6ce042",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "hourLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "gte",
+        "v": "8",
+        "vt": "str"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 1110,
+    "y": 40,
+    "wires": [
+      [
+        "1267692a.182fb7"
+      ],
+      [
+        "adfe951f.fea2a8"
+      ]
+    ]
+  },
+  {
+    "id": "1267692a.182fb7",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Demain",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Demain",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1260,
+    "y": 40,
+    "wires": [
+      [
+        "2224c6a8.98aaba"
+      ]
+    ]
+  },
+  {
+    "id": "adfe951f.fea2a8",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Aujourd'hui",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Aujourd'hui",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1270,
+    "y": 80,
+    "wires": [
+      [
+        "2224c6a8.98aaba"
+      ]
+    ]
+  },
+  {
+    "id": "bbb11e08.95ca9",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "recyclage/weekDay",
+    "topic": "collecte/recyclage/weekDay",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1350,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "fb52f58e.ecd7f8",
+    "type": "api-current-state",
+    "z": "ffc06c8d.7cb55",
+    "name": "Poubelles",
+    "server": "6742e097.d9796",
+    "version": 1,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "override_topic": true,
+    "entity_id": "calendar.poubelles",
+    "state_type": "str",
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "blockInputOverrides": false,
+    "x": 440,
+    "y": 340,
+    "wires": [
+      [
+        "9c761013.23ab9"
+      ]
+    ]
+  },
+  {
+    "id": "bd31e930.f5d8f8",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "Remaining Time",
+    "func": "var pickup = msg.data.attributes.start_time;\nvar year = parseInt(pickup.substr(0, 4));\nvar month = parseInt(pickup.substr(5, 2))-1;\nvar monthOr = parseInt(pickup.substr(5, 2));\nvar day = parseInt(pickup.substr(8, 2));\nvar hour = parseInt(pickup.substr(11, 2));\nvar min = parseInt(pickup.substr(14, 2));\nvar sec = parseInt(pickup.substr(17, 2));\nvar futureDate = new Date(year, month, day, hour, min, sec);\nvar futureDateDay = futureDate.getDay();\nvar futureDateDayText = futureDate.toLocaleString('en-us', {  weekday: 'long' });\nvar futureDateMS = futureDate.getTime();\nvar curDate = new Date()\nvar curDateMS = curDate.getTime();\nvar deltaMS = futureDateMS-curDateMS;\nvar dayLeft = Math.floor(deltaMS/(24*60*60*1000));\nvar hourLeft = Math.floor((deltaMS/(60*60*1000))-(dayLeft*24));\nvar minLeft = Math.floor((deltaMS/60000)-(dayLeft*24*60)-(hourLeft*60));\nvar msg={\"payload\": \"countdownTimer\", \"dayLeft\": dayLeft, \"hourLeft\": hourLeft, \"minLeft\": minLeft, \"weekDay\": futureDateDayText, \"futureYear\": year, \"futureMonth\": monthOr, \"futureDay\": day}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 680,
+    "y": 340,
+    "wires": [
+      [
+        "5ca65cd2.37de44",
+        "84863f41.aed06"
+      ]
+    ]
+  },
+  {
+    "id": "895deda7.e656f",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "weekDay",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "weekDay",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 860,
+    "y": 440,
+    "wires": [
+      [
+        "6be45679.24fd48"
+      ]
+    ]
+  },
+  {
+    "id": "5ca65cd2.37de44",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "dayLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "0",
+        "vt": "str"
+      },
+      {
+        "t": "gt",
+        "v": "0",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 850,
+    "y": 340,
+    "wires": [
+      [
+        "40e72f2a.f9023"
+      ],
+      [
+        "33bd7e53.dd1e72"
+      ]
+    ]
+  },
+  {
+    "id": "40e72f2a.f9023",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "hourLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "gte",
+        "v": "8",
+        "vt": "str"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 990,
+    "y": 320,
+    "wires": [
+      [
+        "1c34dc01.cf0eb4"
+      ],
+      [
+        "601c2b6.9e3e1d4"
+      ]
+    ]
+  },
+  {
+    "id": "1c34dc01.cf0eb4",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Demain",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Demain",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1140,
+    "y": 320,
+    "wires": [
+      [
+        "777ce6a6.6d2ab8"
+      ]
+    ]
+  },
+  {
+    "id": "601c2b6.9e3e1d4",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Aujourd'hui",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Aujourd'hui",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1150,
+    "y": 360,
+    "wires": [
+      [
+        "777ce6a6.6d2ab8"
+      ]
+    ]
+  },
+  {
+    "id": "33bd7e53.dd1e72",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "To Words",
+    "func": "var msg = {\"payload\":  \"dans \"+(msg.dayLeft+1)+\" jours\"}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 1010,
+    "y": 400,
+    "wires": [
+      [
+        "777ce6a6.6d2ab8"
+      ]
+    ]
+  },
+  {
+    "id": "6be45679.24fd48",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "poubelles/weekDay",
+    "topic": "collecte/poubelles/weekDay",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1270,
+    "y": 520,
+    "wires": []
+  },
+  {
+    "id": "38973788.5fa5a8",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "branches/weekDay",
+    "topic": "collecte/branches/weekDay",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1290,
+    "y": 840,
+    "wires": []
+  },
+  {
+    "id": "a4a1a219.d3c1e",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "residusVerts/weekDay",
+    "topic": "collecte/residusVerts/weekDay",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1200,
+    "y": 1140,
+    "wires": []
+  },
+  {
+    "id": "2628ab75.16b904",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "grosDechets/weekDay",
+    "topic": "collecte/grosDechets/weekDay",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1200,
+    "y": 1420,
+    "wires": []
+  },
+  {
+    "id": "a547144f.f771b8",
+    "type": "mqtt out",
+    "z": "ffc06c8d.7cb55",
+    "name": "composte/weekDay",
+    "topic": "collecte/composte/weekDay",
+    "qos": "",
+    "retain": "true",
+    "broker": "7653f881.b9b078",
+    "x": 1260,
+    "y": 1720,
+    "wires": []
+  },
+  {
+    "id": "49f5d7b1.8ab818",
+    "type": "api-current-state",
+    "z": "ffc06c8d.7cb55",
+    "name": "Branches",
+    "server": "6742e097.d9796",
+    "version": 1,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "override_topic": true,
+    "entity_id": "calendar.branches",
+    "state_type": "str",
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "blockInputOverrides": false,
+    "x": 380,
+    "y": 660,
+    "wires": [
+      [
+        "2ba5e07c.f21d4"
+      ]
+    ]
+  },
+  {
+    "id": "8cbc3ab4.eb17e8",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "Remaining Time",
+    "func": "var pickup = msg.data.attributes.start_time;\nvar year = parseInt(pickup.substr(0, 4));\nvar month = parseInt(pickup.substr(5, 2))-1;\nvar monthOr = parseInt(pickup.substr(5, 2));\nvar day = parseInt(pickup.substr(8, 2));\nvar hour = parseInt(pickup.substr(11, 2));\nvar min = parseInt(pickup.substr(14, 2));\nvar sec = parseInt(pickup.substr(17, 2));\nvar futureDate = new Date(year, month, day, hour, min, sec);\nvar futureDateDay = futureDate.getDay();\nvar futureDateDayText = futureDate.toLocaleString('en-us', {  weekday: 'long' });\nvar futureDateMS = futureDate.getTime();\nvar curDate = new Date()\nvar curDateMS = curDate.getTime();\nvar deltaMS = futureDateMS-curDateMS;\nvar dayLeft = Math.floor(deltaMS/(24*60*60*1000));\nvar hourLeft = Math.floor((deltaMS/(60*60*1000))-(dayLeft*24));\nvar minLeft = Math.floor((deltaMS/60000)-(dayLeft*24*60)-(hourLeft*60));\nvar msg={\"payload\": \"countdownTimer\", \"dayLeft\": dayLeft, \"hourLeft\": hourLeft, \"minLeft\": minLeft, \"weekDay\": futureDateDayText, \"futureYear\": year, \"futureMonth\": monthOr, \"futureDay\": day}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 680,
+    "y": 660,
+    "wires": [
+      [
+        "c569f0e6.a43e7",
+        "6c90e7b1.857728"
+      ]
+    ]
+  },
+  {
+    "id": "3ae14541.cbe66a",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "weekDay",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "weekDay",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 860,
+    "y": 760,
+    "wires": [
+      [
+        "38973788.5fa5a8"
+      ]
+    ]
+  },
+  {
+    "id": "c569f0e6.a43e7",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "dayLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "0",
+        "vt": "str"
+      },
+      {
+        "t": "gt",
+        "v": "0",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 850,
+    "y": 660,
+    "wires": [
+      [
+        "678cd730.a0ade8"
+      ],
+      [
+        "3efee4f3.2bdaac"
+      ]
+    ]
+  },
+  {
+    "id": "678cd730.a0ade8",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "hourLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "gte",
+        "v": "8",
+        "vt": "str"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 990,
+    "y": 640,
+    "wires": [
+      [
+        "b846969a.dd3888"
+      ],
+      [
+        "ff8d3d7c.dc6a9"
+      ]
+    ]
+  },
+  {
+    "id": "b846969a.dd3888",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Demain",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Demain",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1140,
+    "y": 640,
+    "wires": [
+      [
+        "1d5bce90.ea2c71"
+      ]
+    ]
+  },
+  {
+    "id": "ff8d3d7c.dc6a9",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Aujourd'hui",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Aujourd'hui",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1150,
+    "y": 680,
+    "wires": [
+      [
+        "1d5bce90.ea2c71"
+      ]
+    ]
+  },
+  {
+    "id": "3efee4f3.2bdaac",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "To Words",
+    "func": "var msg = {\"payload\":  \"dans \"+(msg.dayLeft+1)+\" jours\"}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 1010,
+    "y": 720,
+    "wires": [
+      [
+        "1d5bce90.ea2c71"
+      ]
+    ]
+  },
+  {
+    "id": "a5b02409.72d048",
+    "type": "api-current-state",
+    "z": "ffc06c8d.7cb55",
+    "name": "ResidusVerts",
+    "server": "6742e097.d9796",
+    "version": 1,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "override_topic": true,
+    "entity_id": "calendar.residus_verts",
+    "state_type": "str",
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "blockInputOverrides": false,
+    "x": 350,
+    "y": 960,
+    "wires": [
+      [
+        "6429e0a6.8ae0e"
+      ]
+    ]
+  },
+  {
+    "id": "c7976661.765f28",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "Remaining Time",
+    "func": "var pickup = msg.data.attributes.start_time;\nvar year = parseInt(pickup.substr(0, 4));\nvar month = parseInt(pickup.substr(5, 2))-1;\nvar monthOr = parseInt(pickup.substr(5, 2));\nvar day = parseInt(pickup.substr(8, 2));\nvar hour = parseInt(pickup.substr(11, 2));\nvar min = parseInt(pickup.substr(14, 2));\nvar sec = parseInt(pickup.substr(17, 2));\nvar futureDate = new Date(year, month, day, hour, min, sec);\nvar futureDateDay = futureDate.getDay();\nvar futureDateDayText = futureDate.toLocaleString('en-us', {  weekday: 'long' });\nvar futureDateMS = futureDate.getTime();\nvar curDate = new Date()\nvar curDateMS = curDate.getTime();\nvar deltaMS = futureDateMS-curDateMS;\nvar dayLeft = Math.floor(deltaMS/(24*60*60*1000));\nvar hourLeft = Math.floor((deltaMS/(60*60*1000))-(dayLeft*24));\nvar minLeft = Math.floor((deltaMS/60000)-(dayLeft*24*60)-(hourLeft*60));\nvar msg={\"payload\": \"countdownTimer\", \"dayLeft\": dayLeft, \"hourLeft\": hourLeft, \"minLeft\": minLeft, \"weekDay\": futureDateDayText, \"futureYear\": year, \"futureMonth\": monthOr, \"futureDay\": day}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 580,
+    "y": 960,
+    "wires": [
+      [
+        "f3c7b664.50c7c8",
+        "88e29c76.8b4d6"
+      ]
+    ]
+  },
+  {
+    "id": "672f733.9121b8c",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "weekDay",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "weekDay",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 760,
+    "y": 1060,
+    "wires": [
+      [
+        "a4a1a219.d3c1e"
+      ]
+    ]
+  },
+  {
+    "id": "f3c7b664.50c7c8",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "dayLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "0",
+        "vt": "str"
+      },
+      {
+        "t": "gt",
+        "v": "0",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 750,
+    "y": 960,
+    "wires": [
+      [
+        "93df2ccd.404fc"
+      ],
+      [
+        "91f5419e.201ec"
+      ]
+    ]
+  },
+  {
+    "id": "93df2ccd.404fc",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "hourLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "gte",
+        "v": "8",
+        "vt": "str"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 890,
+    "y": 940,
+    "wires": [
+      [
+        "b6f97fae.0cb0d"
+      ],
+      [
+        "e9d51b99.fcdf68"
+      ]
+    ]
+  },
+  {
+    "id": "b6f97fae.0cb0d",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Demain",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Demain",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1040,
+    "y": 940,
+    "wires": [
+      [
+        "cdedfb4f.c7ded8"
+      ]
+    ]
+  },
+  {
+    "id": "e9d51b99.fcdf68",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Aujourd'hui",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Aujourd'hui",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1050,
+    "y": 980,
+    "wires": [
+      [
+        "cdedfb4f.c7ded8"
+      ]
+    ]
+  },
+  {
+    "id": "91f5419e.201ec",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "To Words",
+    "func": "var msg = {\"payload\":  \"dans \"+(msg.dayLeft+1)+\" jours\"}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 910,
+    "y": 1020,
+    "wires": [
+      [
+        "cdedfb4f.c7ded8"
+      ]
+    ]
+  },
+  {
+    "id": "58a2c9ee.031068",
+    "type": "api-current-state",
+    "z": "ffc06c8d.7cb55",
+    "name": "Gros Déchets",
+    "server": "6742e097.d9796",
+    "version": 1,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "override_topic": true,
+    "entity_id": "calendar.gros_dechets",
+    "state_type": "str",
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "blockInputOverrides": false,
+    "x": 320,
+    "y": 1260,
+    "wires": [
+      [
+        "1d64d61e.c43f6a"
+      ]
+    ]
+  },
+  {
+    "id": "c9e81c0.438ade8",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "Remaining Time",
+    "func": "var pickup = msg.data.attributes.start_time;\nvar year = parseInt(pickup.substr(0, 4));\nvar month = parseInt(pickup.substr(5, 2))-1;\nvar monthOr = parseInt(pickup.substr(5, 2));\nvar day = parseInt(pickup.substr(8, 2));\nvar hour = parseInt(pickup.substr(11, 2));\nvar min = parseInt(pickup.substr(14, 2));\nvar sec = parseInt(pickup.substr(17, 2));\nvar futureDate = new Date(year, month, day, hour, min, sec);\nvar futureDateDay = futureDate.getDay();\nvar futureDateDayText = futureDate.toLocaleString('en-us', {  weekday: 'long' });\nvar futureDateMS = futureDate.getTime();\nvar curDate = new Date()\nvar curDateMS = curDate.getTime();\nvar deltaMS = futureDateMS-curDateMS;\nvar dayLeft = Math.floor(deltaMS/(24*60*60*1000));\nvar hourLeft = Math.floor((deltaMS/(60*60*1000))-(dayLeft*24));\nvar minLeft = Math.floor((deltaMS/60000)-(dayLeft*24*60)-(hourLeft*60));\nvar msg={\"payload\": \"countdownTimer\", \"dayLeft\": dayLeft, \"hourLeft\": hourLeft, \"minLeft\": minLeft, \"weekDay\": futureDateDayText, \"futureYear\": year, \"futureMonth\": monthOr, \"futureDay\": day}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 560,
+    "y": 1260,
+    "wires": [
+      [
+        "65e7eea6.d8019",
+        "ab7d389e.618488"
+      ]
+    ]
+  },
+  {
+    "id": "3a6780ab.6c2bb",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "weekDay",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "weekDay",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 740,
+    "y": 1360,
+    "wires": [
+      [
+        "2628ab75.16b904"
+      ]
+    ]
+  },
+  {
+    "id": "65e7eea6.d8019",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "dayLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "0",
+        "vt": "str"
+      },
+      {
+        "t": "gt",
+        "v": "0",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 730,
+    "y": 1260,
+    "wires": [
+      [
+        "4a6eb42c.937d3c"
+      ],
+      [
+        "4a3931d2.37e16"
+      ]
+    ]
+  },
+  {
+    "id": "4a6eb42c.937d3c",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "hourLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "gte",
+        "v": "8",
+        "vt": "str"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 870,
+    "y": 1240,
+    "wires": [
+      [
+        "249a4c17.016844"
+      ],
+      [
+        "866221d1.a77b1"
+      ]
+    ]
+  },
+  {
+    "id": "249a4c17.016844",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Demain",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Demain",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1020,
+    "y": 1240,
+    "wires": [
+      [
+        "61c66d63.7e9b34"
+      ]
+    ]
+  },
+  {
+    "id": "866221d1.a77b1",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Aujourd'hui",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Aujourd'hui",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1030,
+    "y": 1280,
+    "wires": [
+      [
+        "61c66d63.7e9b34"
+      ]
+    ]
+  },
+  {
+    "id": "4a3931d2.37e16",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "To Words",
+    "func": "var msg = {\"payload\":  \"dans \"+(msg.dayLeft+1)+\" jours\"}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 890,
+    "y": 1320,
+    "wires": [
+      [
+        "61c66d63.7e9b34"
+      ]
+    ]
+  },
+  {
+    "id": "d3b6fe53.da623",
+    "type": "api-current-state",
+    "z": "ffc06c8d.7cb55",
+    "name": "Composte",
+    "server": "6742e097.d9796",
+    "version": 1,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "override_topic": true,
+    "entity_id": "calendar.composte",
+    "state_type": "str",
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "blockInputOverrides": false,
+    "x": 290,
+    "y": 1580,
+    "wires": [
+      [
+        "b4560e2a.01543"
+      ]
+    ]
+  },
+  {
+    "id": "4a091c13.d7c344",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "Remaining Time",
+    "func": "var pickup = msg.data.attributes.start_time;\nvar year = parseInt(pickup.substr(0, 4));\nvar month = parseInt(pickup.substr(5, 2))-1;\nvar monthOr = parseInt(pickup.substr(5, 2));\nvar day = parseInt(pickup.substr(8, 2));\nvar hour = parseInt(pickup.substr(11, 2));\nvar min = parseInt(pickup.substr(14, 2));\nvar sec = parseInt(pickup.substr(17, 2));\nvar futureDate = new Date(year, month, day, hour, min, sec);\nvar futureDateDay = futureDate.getDay();\nvar futureDateDayText = futureDate.toLocaleString('en-us', {  weekday: 'long' });\nvar futureDateMS = futureDate.getTime();\nvar curDate = new Date()\nvar curDateMS = curDate.getTime();\nvar deltaMS = futureDateMS-curDateMS;\nvar dayLeft = Math.floor(deltaMS/(24*60*60*1000));\nvar hourLeft = Math.floor((deltaMS/(60*60*1000))-(dayLeft*24));\nvar minLeft = Math.floor((deltaMS/60000)-(dayLeft*24*60)-(hourLeft*60));\nvar msg={\"payload\": \"countdownTimer\", \"dayLeft\": dayLeft, \"hourLeft\": hourLeft, \"minLeft\": minLeft, \"weekDay\": futureDateDayText, \"futureYear\": year, \"futureMonth\": monthOr, \"futureDay\": day}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 560,
+    "y": 1580,
+    "wires": [
+      [
+        "300f7b54.6acac4",
+        "f45328a4.f1ec48"
+      ]
+    ]
+  },
+  {
+    "id": "d3cb46b4.a53388",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "weekDay",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "weekDay",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 760,
+    "y": 1680,
+    "wires": [
+      [
+        "a547144f.f771b8"
+      ]
+    ]
+  },
+  {
+    "id": "300f7b54.6acac4",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "dayLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "0",
+        "vt": "str"
+      },
+      {
+        "t": "gt",
+        "v": "0",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 730,
+    "y": 1580,
+    "wires": [
+      [
+        "4d70335e.1b8e6c"
+      ],
+      [
+        "53153855.064ff8"
+      ]
+    ]
+  },
+  {
+    "id": "4d70335e.1b8e6c",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "",
+    "property": "hourLeft",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "gte",
+        "v": "8",
+        "vt": "str"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 870,
+    "y": 1560,
+    "wires": [
+      [
+        "61c6ca3a.11b264"
+      ],
+      [
+        "18ff7c69.7a2714"
+      ]
+    ]
+  },
+  {
+    "id": "61c6ca3a.11b264",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Demain",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Demain",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1020,
+    "y": 1560,
+    "wires": [
+      [
+        "2b37930f.0d6ebc"
+      ]
+    ]
+  },
+  {
+    "id": "18ff7c69.7a2714",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "Aujourd'hui",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "Aujourd'hui",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1030,
+    "y": 1600,
+    "wires": [
+      [
+        "2b37930f.0d6ebc"
+      ]
+    ]
+  },
+  {
+    "id": "53153855.064ff8",
+    "type": "function",
+    "z": "ffc06c8d.7cb55",
+    "name": "To Words",
+    "func": "var msg = {\"payload\":  \"dans \"+(msg.dayLeft+1)+\" jours\"}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 890,
+    "y": 1640,
+    "wires": [
+      [
+        "2b37930f.0d6ebc"
+      ]
+    ]
+  },
+  {
+    "id": "ab7d389e.618488",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "jourDeSemaine",
+    "rules": [
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Monday",
+        "fromt": "str",
+        "to": "Lundi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Tuesday",
+        "fromt": "str",
+        "to": "Mardi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Wednesday",
+        "fromt": "str",
+        "to": "Mercredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Thursday",
+        "fromt": "str",
+        "to": "Jeudi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Friday",
+        "fromt": "str",
+        "to": "Vendredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Saturday",
+        "fromt": "str",
+        "to": "Samedi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Sunday",
+        "fromt": "str",
+        "to": "Dimanche",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 680,
+    "y": 1420,
+    "wires": [
+      [
+        "3a6780ab.6c2bb"
+      ]
+    ]
+  },
+  {
+    "id": "88e29c76.8b4d6",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "jourDeSemaine",
+    "rules": [
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Monday",
+        "fromt": "str",
+        "to": "Lundi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Tuesday",
+        "fromt": "str",
+        "to": "Mardi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Wednesday",
+        "fromt": "str",
+        "to": "Mercredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Thursday",
+        "fromt": "str",
+        "to": "Jeudi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Friday",
+        "fromt": "str",
+        "to": "Vendredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Saturday",
+        "fromt": "str",
+        "to": "Samedi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Sunday",
+        "fromt": "str",
+        "to": "Dimanche",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 720,
+    "y": 1100,
+    "wires": [
+      [
+        "672f733.9121b8c"
+      ]
+    ]
+  },
+  {
+    "id": "6c90e7b1.857728",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "jourDeSemaine",
+    "rules": [
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Monday",
+        "fromt": "str",
+        "to": "Lundi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Tuesday",
+        "fromt": "str",
+        "to": "Mardi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Wednesday",
+        "fromt": "str",
+        "to": "Mercredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Thursday",
+        "fromt": "str",
+        "to": "Jeudi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Friday",
+        "fromt": "str",
+        "to": "Vendredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Saturday",
+        "fromt": "str",
+        "to": "Samedi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Sunday",
+        "fromt": "str",
+        "to": "Dimanche",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 800,
+    "y": 800,
+    "wires": [
+      [
+        "3ae14541.cbe66a"
+      ]
+    ]
+  },
+  {
+    "id": "84863f41.aed06",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "jourDeSemaine",
+    "rules": [
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Monday",
+        "fromt": "str",
+        "to": "Lundi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Tuesday",
+        "fromt": "str",
+        "to": "Mardi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Wednesday",
+        "fromt": "str",
+        "to": "Mercredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Thursday",
+        "fromt": "str",
+        "to": "Jeudi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Friday",
+        "fromt": "str",
+        "to": "Vendredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Saturday",
+        "fromt": "str",
+        "to": "Samedi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Sunday",
+        "fromt": "str",
+        "to": "Dimanche",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 820,
+    "y": 480,
+    "wires": [
+      [
+        "895deda7.e656f"
+      ]
+    ]
+  },
+  {
+    "id": "26426bb1.dc5b54",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "jourDeSemaine",
+    "rules": [
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Monday",
+        "fromt": "str",
+        "to": "Lundi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Tuesday",
+        "fromt": "str",
+        "to": "Mardi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Wednesday",
+        "fromt": "str",
+        "to": "Mercredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Thursday",
+        "fromt": "str",
+        "to": "Jeudi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Friday",
+        "fromt": "str",
+        "to": "Vendredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Saturday",
+        "fromt": "str",
+        "to": "Samedi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Sunday",
+        "fromt": "str",
+        "to": "Dimanche",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 840,
+    "y": 200,
+    "wires": [
+      [
+        "d5e29fa3.8a77c"
+      ]
+    ]
+  },
+  {
+    "id": "f45328a4.f1ec48",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "jourDeSemaine",
+    "rules": [
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Monday",
+        "fromt": "str",
+        "to": "Lundi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Tuesday",
+        "fromt": "str",
+        "to": "Mardi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Wednesday",
+        "fromt": "str",
+        "to": "Mercredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Thursday",
+        "fromt": "str",
+        "to": "Jeudi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Friday",
+        "fromt": "str",
+        "to": "Vendredi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Saturday",
+        "fromt": "str",
+        "to": "Samedi",
+        "tot": "str"
+      },
+      {
+        "t": "change",
+        "p": "weekDay",
+        "pt": "msg",
+        "from": "Sunday",
+        "fromt": "str",
+        "to": "Dimanche",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 720,
+    "y": 1720,
+    "wires": [
+      [
+        "d3cb46b4.a53388"
+      ]
+    ]
+  },
+  {
+    "id": "b4560e2a.01543",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "Check if found",
+    "property": "data.attributes.start_time",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "nnull"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 460,
+    "y": 1760,
+    "wires": [
+      [
+        "4a091c13.d7c344"
+      ],
+      [
+        "32e03e1f.a3fb92"
+      ]
+    ]
+  },
+  {
+    "id": "32e03e1f.a3fb92",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "N/A",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "N/A",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 730,
+    "y": 1780,
+    "wires": [
+      [
+        "2b37930f.0d6ebc",
+        "a547144f.f771b8"
+      ]
+    ]
+  },
+  {
+    "id": "1d64d61e.c43f6a",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "Check if found",
+    "property": "data.attributes.start_time",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "nnull"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 460,
+    "y": 1480,
+    "wires": [
+      [
+        "c9e81c0.438ade8"
+      ],
+      [
+        "c1686eed.dbcf8"
+      ]
+    ]
+  },
+  {
+    "id": "c1686eed.dbcf8",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "N/A",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "N/A",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 770,
+    "y": 1480,
+    "wires": [
+      [
+        "61c66d63.7e9b34",
+        "2628ab75.16b904"
+      ]
+    ]
+  },
+  {
+    "id": "6429e0a6.8ae0e",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "Check if found",
+    "property": "data.attributes.start_time",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "nnull"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 440,
+    "y": 1160,
+    "wires": [
+      [
+        "c7976661.765f28"
+      ],
+      [
+        "d31184c2.4078c8"
+      ]
+    ]
+  },
+  {
+    "id": "d31184c2.4078c8",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "N/A",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "N/A",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 770,
+    "y": 1160,
+    "wires": [
+      [
+        "cdedfb4f.c7ded8",
+        "a4a1a219.d3c1e"
+      ]
+    ]
+  },
+  {
+    "id": "2ba5e07c.f21d4",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "Check if found",
+    "property": "data.attributes.start_time",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "nnull"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 460,
+    "y": 880,
+    "wires": [
+      [
+        "8cbc3ab4.eb17e8"
+      ],
+      [
+        "9c0f77b.5c78588"
+      ]
+    ]
+  },
+  {
+    "id": "9c0f77b.5c78588",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "N/A",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "N/A",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 890,
+    "y": 880,
+    "wires": [
+      [
+        "1d5bce90.ea2c71",
+        "38973788.5fa5a8"
+      ]
+    ]
+  },
+  {
+    "id": "9c761013.23ab9",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "Check if found",
+    "property": "data.attributes.start_time",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "nnull"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 480,
+    "y": 580,
+    "wires": [
+      [
+        "bd31e930.f5d8f8"
+      ],
+      [
+        "4441661b.538188"
+      ]
+    ]
+  },
+  {
+    "id": "4441661b.538188",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "N/A",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "N/A",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 910,
+    "y": 580,
+    "wires": [
+      [
+        "777ce6a6.6d2ab8",
+        "6be45679.24fd48"
+      ]
+    ]
+  },
+  {
+    "id": "40b99ad.30c1364",
+    "type": "switch",
+    "z": "ffc06c8d.7cb55",
+    "name": "Check if found",
+    "property": "data.attributes.start_time",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "nnull"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 520,
+    "y": 260,
+    "wires": [
+      [
+        "d7860d3b.18263"
+      ],
+      [
+        "c53d3849.f44338"
+      ]
+    ]
+  },
+  {
+    "id": "c53d3849.f44338",
+    "type": "change",
+    "z": "ffc06c8d.7cb55",
+    "name": "N/A",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "N/A",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 950,
+    "y": 260,
+    "wires": [
+      [
+        "2224c6a8.98aaba",
+        "bbb11e08.95ca9"
+      ]
+    ]
+  },
+  {
+    "id": "7653f881.b9b078",
+    "type": "mqtt-broker",
+    "z": "",
+    "name": "Mosquitto",
+    "broker": "eclipse-mosquitto",
+    "port": "1883",
+    "clientid": "",
+    "usetls": false,
+    "compatmode": false,
+    "keepalive": "60",
+    "cleansession": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthPayload": "",
+    "closeTopic": "",
+    "closeQos": "0",
+    "closePayload": "",
+    "willTopic": "",
+    "willQos": "0",
+    "willPayload": ""
+  },
+  {
+    "id": "6742e097.d9796",
+    "type": "server",
+    "z": "",
+    "name": "Home Assistant",
+    "legacy": false,
+    "hassio": false,
+    "rejectUnauthorizedCerts": false,
+    "ha_boolean": "y|yes|true|on|home|open",
+    "connectionDelay": true,
+    "cacheJson": false
+  }
+]

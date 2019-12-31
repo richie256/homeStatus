@@ -13,6 +13,7 @@ homeassistant:
   # Customization file
   customize: !include customize.yaml
 
+
 # Example configuration.yaml entry
 # weather:
 #   - platform: darksky
@@ -41,7 +42,7 @@ updater:
   # include_used_components: true
 
 # Discover some devices automatically
-discovery:
+#discovery:
 
 # Allows you to issue voice commands from the frontend in enabled browsers
 conversation:
@@ -114,13 +115,20 @@ device_tracker:
 ## Includes
 input_boolean: !include includes/input_boolean.yaml
 input_select: !include includes/input_select.yaml
-automation: !include_dir_merge_list yaml_automation/
+#automation: !include_dir_merge_list yaml_automation/
 zone: !include zones.yaml
 group: !include includes/group/group.hydroquebec.yaml
 
 mqtt:
   broker: localhost
+  port: 1883
   username: !secret mqtt_username
   password: !secret mqtt_password
 
 automation: !include automations/soussol_atelier.yaml
+
+google:
+  client_id: !secret gcal_oauth_client_id
+  client_secret: !secret gcal_oauth_client_secret
+
+

@@ -9,6 +9,10 @@
 - [ ] Incorporate Ultrasonic distance
 - [ ] Google Domain Service (free service)
 - [ ] Explore .local hosts
+- [ ] Recycling and garbage collect schedule.
+- [ ] Perform NodeRed backup: $ docker cp  mynodered:/data  /your/backup/directory
+
+
 
 
 # docker Compose File
@@ -61,6 +65,10 @@ Please choose the proper subscription http://openweathermap.org/price"
 - [ ] Add equipmentStatus.
 - [ ] Remove the `docker-compose.arm.yaml` file.
 - [ ] Integrate desired temperature.
+- [ ] Integrate Grafana iFrame: https://community.home-assistant.io/t/best-way-to-get-grafana-chart-into-lovelace-card/128857
+- [ ] Create a "Plant Status": https://www.home-assistant.io/lovelace/plant-status/
+- [ ] Ajouter uptime, batterie life , metric 
+
 
 ## How to update ecobee config
 - Log into your Ecobee account and create a new API under Developer.
@@ -69,14 +77,34 @@ Please choose the proper subscription http://openweathermap.org/price"
 - Request a new pin: `curl http://localhost:5002/thermostat/ecobee/pin/request` then retrieve the PIN from the Debug logs.
 - Enter the PIN in your Ecobee Account, then request the token: `curl http://localhost:5002/thermostat/ecobee/token/request`
 
+# NodeRed
+
+http://192.168.68.120:1880
+
+- [ ] Change the Encrypted key.
+
+Your flow credentials file is encrypted using a system-generated key.
+
+If the system-generated key is lost for any reason, your credentials
+file will not be recoverable, you will have to delete it and re-enter
+your credentials.
+
+You should set your own key using the 'credentialSecret' option in
+your settings file. Node-RED will then re-encrypt your credentials
+file using your chosen key the next time you deploy a change.
+
+
 # To execute:
 docker-compose -f docker-compose.yaml up -d homeassistant
 
 docker-compose -f docker-compose.yaml up -d outsidetemp-service
 
-docker-compose -f docker-compose.yaml up -d redis-cache ecobee-service outsidetemp-service influxdb telegraf grafana
+docker-compose -f docker-compose.yaml up -d redis-cache ecobee-service outsidetemp-service influxdb telegraf grafana homeassistant eclipse-mosquitto
 
-docker-compose -f docker-compose.yaml up -d eclipse-mosquitto
+docker-compose -f docker-compose.yaml up -d pyhydroquebec
+
+docker-compose -f docker-compose.yaml up -d nodered
+
 
 
 cd projects/homeStatus
@@ -86,6 +114,8 @@ docker-compose -f docker-compose.yaml up -d outsidetemp-service ecobee-service i
 equipmentStatus
 The status of all equipment controlled by this Thermostat. Only running equipment is listed in the CSV String.
 Values: heatPump, heatPump2, heatPump3, compCool1, compCool2, auxHeat1, auxHeat2, auxHeat3, fan, humidifier, dehumidifier, ventilator, economizer, compHotWater, auxHotWater.
+
+
 
 
 

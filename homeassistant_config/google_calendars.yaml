@@ -1,0 +1,33 @@
+- cal_id: !secret gcal_collect_cal_id
+  entities:
+  - device_id: composte
+    ignore_availability: true
+    name: Composte
+    track: true
+    search: ALIMENTAIRE
+  - device_id: recyclage
+    ignore_availability: true
+    name: Recyclage
+    track: true
+    search: COLLECTE RECYCLAGE
+  - device_id: poubelles
+    ignore_availability: true
+    name: Poubelles
+    track: true
+    search: COLLECTE RÉSIDUS ULTIMES
+  - device_id: branches
+    ignore_availability: true
+    name: Branches
+    track: true
+    search: COLLECTE DES BRANCHES
+  - device_id: residus_verts
+    ignore_availability: true
+    name: Résidus Verts
+    track: true
+    search: RÉSIDUS VERTS
+  - device_id: gros_dechets
+    ignore_availability: true
+    name: Gros Déchets
+    track: true
+    search: ENCOMBRANT EN BOIS
+
