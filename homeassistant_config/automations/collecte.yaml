@@ -1,0 +1,17 @@
+- id: '1557238632971'
+  alias: Recycling Week
+  trigger:
+    - entity_id: calendar.calendrier_collect
+      platform: state
+      to: 'on'
+      condition:
+        - condition: template
+          attributes.start_time
+          value_template: '{{ states.calendar.calendrier_collect.attributes.message == ''Recycling'' }}'
+      action:
+        - data:
+          brightness: '50'
+          color_name: yellow
+          entity_id: light.lounge_1
+          power: 'true'
+          service: light.lifx_set_state

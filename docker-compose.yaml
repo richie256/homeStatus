@@ -63,7 +63,6 @@ services:
       - ./mosquitto_passwd:/etc/mosquitto/passwd:ro
       - eclipse-mosquito-data:/mosquitto/data
       - eclipse-mosquito-log:/mosquitto/log
-      # - ./mosquitto.log:/mosquitto/log/mosquitto.log:rw
 
   homeassistant:
     container_name: home-assistant
@@ -78,6 +77,9 @@ services:
     ports:
       - "8123:8123"
     privileged: true
+    depends_on:
+      - eclipse-mosquitto
+   
 
   influxdb:
     image: influxdb
@@ -126,6 +128,19 @@ services:
     depends_on:
       - influxdb
 
+  # docker run -it -p 1880:1880 --name mynodered nodered/node-red:latest
+  nodered:
+    container_name: nodered
+    image: nodered/node-red
+    volumes:
+      - nodered-data:/data
+    ports:
+      - 1880:1880
+    depends_on:
+      - eclipse-mosquitto
+      - homeassistant
+
+
 volumes:
   influx:
     driver: local
@@ -136,6 +151,8 @@ volumes:
   eclipse-mosquito-data:
     driver: local
   eclipse-mosquito-log:
+    driver: local
+  nodered-data:
     driver: local
 
 

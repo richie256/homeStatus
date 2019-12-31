@@ -1,0 +1,49 @@
+- platform: mqtt
+  name: poubelles_weekday
+  state_topic: "collecte/poubelles/weekDay"
+
+- platform: mqtt
+  name: poubelles_dayleft
+  state_topic: "collecte/poubelles/dayLeft"
+
+- platform: mqtt
+  name: recyclage_weekday
+  state_topic: "collecte/recyclage/weekDay"
+
+- platform: mqtt
+  name: recyclage_dayleft
+  state_topic: "collecte/recyclage/dayLeft"
+
+- platform: mqtt
+  name: branches_weekday
+  state_topic: "collecte/branches/weekDay"
+
+- platform: mqtt
+  name: branches_dayleft
+  state_topic: "collecte/branches/dayLeft"
+
+- platform: mqtt
+  name: residusverts_weekday
+  state_topic: "collecte/residusVerts/weekDay"
+
+- platform: mqtt
+  name: residusverts_dayleft
+  state_topic: "collecte/residusVerts/dayLeft"
+
+- platform: mqtt
+  name: grosdechets_weekday
+  state_topic: "collecte/grosDechets/weekDay"
+
+- platform: mqtt
+  name: grosdechets_dayleft
+  state_topic: "collecte/grosDechets/dayLeft"
+
+- platform: mqtt
+  name: composte_weekday
+  state_topic: "collecte/composte/weekDay"
+
+- platform: mqtt
+  name: composte_dayleft
+  state_topic: "collecte/composte/dayLeft"
+
+
