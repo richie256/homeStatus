@@ -5,13 +5,21 @@
 - [x] Fix the temperature service
 - [x] Fix the ecobee service
 - [x] Adapt the code using the new python-ecobee-api
-- [ ] Create a new password mosquitto_passwd
 - [ ] Incorporate Ultrasonic distance
 - [ ] Google Domain Service (free service)
 - [ ] Explore .local hosts
 - [ ] Recycling and garbage collect schedule.
-- [ ] Perform NodeRed backup: $ docker cp  mynodered:/data  /your/backup/directory
+- [ ] Perform NodeRed backup: $ `docker cp  mynodered:/data  /your/backup/directory`
+- [ ] Create a "Plant Status": https://www.home-assistant.io/lovelace/plant-status/
+- [ ] Ajouter uptime, batterie life , metric 
+- [ ] Ajouter collecte des ordures. https://www.reddit.com/r/homeassistant/comments/blf3wu/put_some_time_into_lovelace_again_tried_to_make/
+- [x] Ajouter bignumber-card: https://github.com/custom-cards/bignumber-card
+- [ ] Suivre les instructions: https://community.home-assistant.io/t/lovelace-bignumber-card/59280
+- [x] Ajouter custom:vertical-style-card: https://github.com/matisaul/vertical-style-card
 
+
+# Inspirations
+- [ ] F1 Qualifications: https://www.reddit.com/r/homeassistant/comments/cerjse/big_thumbs_up_for_the_0960_sleek_sidebar_really/
 
 
 
@@ -66,8 +74,8 @@ Please choose the proper subscription http://openweathermap.org/price"
 - [ ] Remove the `docker-compose.arm.yaml` file.
 - [ ] Integrate desired temperature.
 - [ ] Integrate Grafana iFrame: https://community.home-assistant.io/t/best-way-to-get-grafana-chart-into-lovelace-card/128857
-- [ ] Create a "Plant Status": https://www.home-assistant.io/lovelace/plant-status/
-- [ ] Ajouter uptime, batterie life , metric 
+- [ ] Configure the Ecobee API Key using commands: `docker-compose run --rm ecobee-service is-api` 
+
 
 
 ## How to update ecobee config
@@ -99,7 +107,9 @@ docker-compose -f docker-compose.yaml up -d homeassistant
 
 docker-compose -f docker-compose.yaml up -d outsidetemp-service
 
-docker-compose -f docker-compose.yaml up -d redis-cache ecobee-service outsidetemp-service influxdb telegraf grafana homeassistant eclipse-mosquitto
+docker-compose -f docker-compose.yaml up -d redis-cache ecobee-service outsidetemp-service influxdb telegraf grafana homeassistant eclipse-mosquitto nodered
+
+
 
 docker-compose -f docker-compose.yaml up -d pyhydroquebec
 
