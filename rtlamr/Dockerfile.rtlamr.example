@@ -1,0 +1,7 @@
+FROM golang
+
+WORKDIR /go/src/app
+
+RUN go get github.com/bemasher/rtlamr
+
+CMD ["rtlamr", "-server=rtl_tcp:1234", "-filterid=12345678", "-msgtype=scm+", "-format=json"]

@@ -33,3 +33,4 @@ homeassistant_config/home-assistant*.db
 #########################
 homeassistant_config/known_devices.yaml
 homeassistant_config/.google.token
+Dockerfile.rtlamr

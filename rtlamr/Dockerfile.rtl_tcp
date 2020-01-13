@@ -1,0 +1,7 @@
+FROM debian:stretch-slim
+
+RUN set -x \
+    && apt-get update \
+    && apt-get install -y rtl-sdr netcat-openbsd
+
+CMD ["rtl_tcp", "-a", "0.0.0.0"]
