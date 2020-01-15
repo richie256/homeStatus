@@ -16,10 +16,83 @@
 - [x] Ajouter bignumber-card: https://github.com/custom-cards/bignumber-card
 - [ ] Suivre les instructions: https://community.home-assistant.io/t/lovelace-bignumber-card/59280
 - [x] Ajouter custom:vertical-style-card: https://github.com/matisaul/vertical-style-card
+- [ ] RTL Bus schedule data scrapping.
+- [ ] Integrate Grafana iFrame: https://community.home-assistant.io/t/best-way-to-get-grafana-chart-into-lovelace-card/128857
+- [ ] Remove the `docker-compose.arm.yaml` file.
+- [ ] Incorporate ecobeeapi and outsidetemp as individual containers.
+- [ ] raspberry CPU temp info and other?
+
+utility_meter. https://www.home-assistant.io/integrations/utility_meter/
+https://community.home-assistant.io/t/any-experience-with-utility-meter-functions/149904
+
+graph:
+integration https://www.home-assistant.io/integrations/integration/
+mini-graph-card: https://github.com/kalkih/mini-graph-card
+
+
+mqtt publish?  example: https://github.com/fliphess/esp8266_p1meter
+
+example mqtt:
+sensors/power/p1meter/consumption_low_tarif 2209397
+sensors/power/p1meter/consumption_high_tarif 1964962
+sensors/power/p1meter/actual_consumption 313
+sensors/power/p1meter/instant_power_usage 313
+sensors/power/p1meter/instant_power_current 1000
+sensors/power/p1meter/gas_meter_m3 968922
+sensors/power/p1meter/actual_tarif_group 2
+sensors/power/p1meter/short_power_outages 3
+sensors/power/p1meter/long_power_outages 1
+sensors/power/p1meter/short_power_drops 0
+sensors/power/p1meter/short_power_peaks 0
+
+Time
+Uptime
+
+
+
+sensors/gas/1234567/total_consumption 968922
+sensors/gas/1234567/reading 1
+
+total_consumption
+
+
+
+
+- [ ] Secheuse laveuse - https://www.reddit.com/r/homeassistant/comments/elybp8/tutorial_make_your_dryer_washing_machine_smart/
 
 
 # Inspirations
 - [ ] F1 Qualifications: https://www.reddit.com/r/homeassistant/comments/cerjse/big_thumbs_up_for_the_0960_sleek_sidebar_really/
+- [ ] Environment Canada alerts: https://community.home-assistant.io/t/scrape-sensor-component-get-two-tags/83302
+
+
+
+
+
+
+
+Arrêt av. Malo et Montmartre Code d'arrêt: 32752
+
+Ligne(s) à cet arrêt:
+ 44 Direction Terminus 
+ Centre-ville/Terminus Panama  (horaire)
+ 144 Direction Terminus Centre-ville  
+ (horaire)
+
+Arrêt(s) à proximité
+av. Malo et Montmartre:
+ 44 Direction Secteurs M-N-O de Brossard  
+ (horaire)
+ 144 Direction Secteurs M-N-O de Brossard  
+ (horaire)
+
+
+
+Secteurs M-N-O
+
+
+
+
 
 
 
@@ -35,55 +108,6 @@ Configure the MQTT
 - Install the mosquitto on linux `apt-get install mosquitto`
 - Configure the password file: https://mosquitto.org/man/mosquitto_passwd-1.html
 - Add a new password: `mosquitto_passwd -c mosquitto_passwd <usrrname>`
-
-
-# Outside temps from openweathermap.org
-
-Forecast:
-http://api.openweathermap.org/data/2.5/forecast?id={CITY_CODE_ID}&APPID={APPID}
-
-Current:
-http://api.openweathermap.org/data/2.5/weather?id={CITY_CODE_ID}&APPID={APPID}&units=metric
-
-Details on the api response
-https://openweathermap.org/current
-
-Weather sample:
-https://samples.openweathermap.org/data/2.5/weather?id=2172797&appid=b6907d289e10d714a6e88b30761fae22
-
-Weather Icons list:
-https://openweathermap.org/weather-conditions
-
-Frequency: 
-Calls per minute (no more than)	60
-no more than one time every 10 minutes for one location (city / coordinates / zip-code).
-
-If blocked:
-{
-"cod": 429,
-"message": "Your account is temporary blocked due to exceeding of requests limitation of your subscription type. 
-Please choose the proper subscription http://openweathermap.org/price"
-}
-
-# Ecobee thermostat
-
-- [x] Adapt the code using the new python-ecobee-api
-- [x] Code optimisation
-- [x] Fully test expired tokens
-- [ ] Add equipmentStatus.
-- [ ] Remove the `docker-compose.arm.yaml` file.
-- [ ] Integrate desired temperature.
-- [ ] Integrate Grafana iFrame: https://community.home-assistant.io/t/best-way-to-get-grafana-chart-into-lovelace-card/128857
-- [ ] Configure the Ecobee API Key using commands: `docker-compose run --rm ecobee-service is-api` 
-
-
-
-## How to update ecobee config
-- Log into your Ecobee account and create a new API under Developer.
-- Using the API Key, call the `curl http://localhost:5002/thermostat/ecobee/apiKey/<api_key>`
-- Put the logs in Debug Mode.
-- Request a new pin: `curl http://localhost:5002/thermostat/ecobee/pin/request` then retrieve the PIN from the Debug logs.
-- Enter the PIN in your Ecobee Account, then request the token: `curl http://localhost:5002/thermostat/ecobee/token/request`
 
 # NodeRed
 

@@ -7,3 +7,20 @@ vacation_mode:
   name: "On Vacation"
   initial: off
   icon: mdi:airplane
+
+
+poubelles:
+  name: "Poubelles"
+  initial: off
+  icon: mdi:trash-can
+
+recyclage:
+  name: "Recyclage"
+  initial: off
+  icon: mdi:recycle
+
+residus-verts:
+  name: "Résidus verts"
+  initial: off
+  icon: mdi:leaf
+
