@@ -1,4 +1,4 @@
-class BigNumberCard extends HTMLElement {
+class DoubleValueCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -18,17 +18,17 @@ class BigNumberCard extends HTMLElement {
     content.id = "value"
     const title = document.createElement('div');
     title.id = "title"
-    title.textContent = cardConfig.title;
     const style = document.createElement('style');
     style.textContent = `
       ha-card {
+        box-shadow: none;
         text-align: center;
-        --bignumber-fill-color: var(--label-badge-blue);
-        --bignumber-percent: 100%;
-        --bignumber-direction: ${cardConfig.from};
+        --doublevalue-fill-color: var(--label-badge-blue);
+        --doublevalue-percent: 100%;
+        --doublevalue-direction: ${cardConfig.from};
         --base-unit: ${cardConfig.scale};
         padding: calc(var(--base-unit)*0.6) calc(var(--base-unit)*0.3);
-        background: linear-gradient(to var(--bignumber-direction), var(--paper-card-background-color) var(--bignumber-percent), var(--bignumber-fill-color) var(--bignumber-percent));
+        background: linear-gradient(to var(--doublevalue-direction), var(--paper-card-background-color) var(--doublevalue-percent), var(--doublevalue-fill-color) var(--doublevalue-percent));
       }
       #value {
         font-size: calc(var(--base-unit) * 1.3);
@@ -36,8 +36,8 @@ class BigNumberCard extends HTMLElement {
         color: var(--primary-text-color);
       }
       #title {
-        font-size: calc(var(--base-unit) * 0.5);
-        line-height: calc(var(--base-unit) * 0.5);
+        font-size: calc(var(--base-unit) * 1.0);
+        line-height: calc(var(--base-unit) * 1.0);
         color: var(--primary-text-color);
       }
     `;
@@ -85,16 +85,21 @@ class BigNumberCard extends HTMLElement {
     const root = this.shadowRoot;
     const entityState = hass.states[config.entity].state;
     const measurement = hass.states[config.entity].attributes.unit_of_measurement || "";
+    const title_entityState = hass.states[config.title_entity].state;
+    const title_measurement = hass.states[config.title_entity].attributes.unit_of_measurement || "";
+
 
     if (entityState !== this._entityState) {
       if (config.min !== undefined && config.max !== undefined) {
-        root.querySelector("ha-card").style.setProperty('--bignumber-percent', `${this._translatePercent(entityState, config.min, config.max)}%`);
+        root.querySelector("ha-card").style.setProperty('--doublevalue-percent', `${this._translatePercent(entityState, config.min, config.max)}%`);
       }
       if (config.severity) {
-        root.querySelector("ha-card").style.setProperty('--bignumber-fill-color', `${this._computeSeverity(entityState, config.severity)}`);
+        root.querySelector("ha-card").style.setProperty('--doublevalue-fill-color', `${this._computeSeverity(entityState, config.severity)}`);
       }
       root.getElementById("value").textContent = `${entityState} ${measurement}`;
-      this._entityState = entityState
+      this._entityState = entityState;
+      root.getElementById("title").textContent = `${title_entityState} ${title_measurement}`;
+      this._title_entityState = title_entityState
     }
     root.lastChild.hass = hass;
   }
@@ -104,4 +109,4 @@ class BigNumberCard extends HTMLElement {
   }
 }
 
-customElements.define('bignumber-card', BigNumberCard);
+customElements.define('doublevalue-card', DoubleValueCard);

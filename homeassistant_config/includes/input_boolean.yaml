@@ -8,7 +8,6 @@ vacation_mode:
   initial: off
   icon: mdi:airplane
 
-
 poubelles:
   name: "Poubelles"
   initial: off
@@ -19,7 +18,7 @@ recyclage:
   initial: off
   icon: mdi:recycle
 
-residus-verts:
+residus_verts:
   name: "Résidus verts"
   initial: off
   icon: mdi:leaf

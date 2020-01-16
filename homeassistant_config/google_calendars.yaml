@@ -31,3 +31,94 @@
     track: true
     search: ENCOMBRANT EN BOIS
 
+- cal_id: lp@f1-fansite.com
+  entities:
+  - device_id: f1_fansite_com_formula_1_event_calendar
+    ignore_availability: true
+    name: F1-Fansite.com - Formula 1 Event Calendar
+    track: true
+
+
+- cal_id: aemsqbri4qrj81mo1479a9ppek@group.calendar.google.com
+  entities:
+  - device_id: infos_nouvelle_maison
+    ignore_availability: true
+    name: Infos Nouvelle Maison
+    track: true
+
+- cal_id: nq9ueckbgt2on8uu527i2afdd4@group.calendar.google.com
+  entities:
+  - device_id: paiements
+    ignore_availability: true
+    name: Paiements
+    track: true
+
+- cal_id: dvs9v52fec8hrn7dq1fv2f6cr4o32fv3@import.calendar.google.com
+  entities:
+  - device_id: f1_calendar_2019
+    ignore_availability: true
+    name: F1 Calendar 2019
+    track: true
+
+- cal_id: dubois.richard@gmail.com
+  entities:
+  - device_id: dubois_richard_gmail_com
+    ignore_availability: true
+    name: dubois.richard@gmail.com
+    track: true
+
+- cal_id: 61o0bm5qdbugktgd2p238qnuis@group.calendar.google.com
+  entities:
+  - device_id: fetes
+    ignore_availability: true
+    name: "F\xEAtes"
+    track: true
+
+- cal_id: jjblha6ao9ckdeo8ifh844ib6g@group.calendar.google.com
+  entities:
+  - device_id: voyage_charlevoix
+    ignore_availability: true
+    name: Voyage Charlevoix
+    track: true
+
+- cal_id: g07t08agh795803md7klsu12lo@group.calendar.google.com
+  entities:
+  - device_id: walmart_schedule
+    ignore_availability: true
+    name: Walmart schedule
+    track: true
+
+- cal_id: addressbook#contacts@group.v.calendar.google.com
+  entities:
+  - device_id: contacts
+    ignore_availability: true
+    name: Contacts
+    track: true
+
+- cal_id: fr.canadian#holiday@group.v.calendar.google.com
+  entities:
+  - device_id: jours_feries_au_canada
+    ignore_availability: true
+    name: "Jours f\xE9ri\xE9s au Canada"
+    track: true
+
+- cal_id: mlb_10_%4eew+%59ork+%59ankees#sports@group.v.calendar.google.com
+  entities:
+  - device_id: new_york_yankees
+    ignore_availability: true
+    name: New York Yankees
+    track: true
+
+- cal_id: mls_24484_%4dontreal+%49mpact#sports@group.v.calendar.google.com
+  entities:
+  - device_id: montreal_impact
+    ignore_availability: true
+    name: Montreal Impact
+    track: true
+
+- cal_id: nhl_10_%4dontreal+%43anadiens#sports@group.v.calendar.google.com
+  entities:
+  - device_id: montreal_canadiens
+    ignore_availability: true
+    name: Montreal Canadiens
+    track: true
