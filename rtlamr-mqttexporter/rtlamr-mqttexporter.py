@@ -96,7 +96,8 @@ def get_delta(endpoint_id):
 # send data to MQTT broker defined in settings
 def send_mqtt(topic, payload):
     try:
-        publish.single(topic, payload=payload, qos=1, hostname=os.environ.get('MQTT_HOST'), port=os.environ.get('MQTT_PORT'), auth=auth)
+        publish.single(topic, payload=payload, qos=1, hostname=os.environ.get('MQTT_HOST'),
+                       port=os.environ.get('MQTT_PORT'), auth=auth)
     except Exception as ex:
         print("MQTT Publish Failed: " + str(ex))
 
