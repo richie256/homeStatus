@@ -155,7 +155,7 @@ services:
       - homeassistant
 
   rtl_tcp:
-    container_name: rtl_tcp
+    # container_name: rtl_tcp
     build:
       context: ./rtlamr
       dockerfile: Dockerfile.rtl_tcp
@@ -164,7 +164,7 @@ services:
       - /dev/bus/usb
 
   rtlamr:
-    container_name: rtlamr
+    # container_name: rtlamr
     build:
       context: ./rtlamr
       dockerfile: Dockerfile.rtlamr
@@ -176,6 +176,8 @@ services:
     build:
       context: rtlamr-mqttexporter
     restart: unless-stopped
+    env_file:
+      mqttexporter-variables.env
     depends_on:
       - eclipse-mosquitto
     volumes:

@@ -97,7 +97,7 @@ def get_delta(endpoint_id):
 def send_mqtt(topic, payload):
     try:
         publish.single(topic, payload=payload, qos=1, hostname=os.environ.get('MQTT_HOST'),
-                       port=os.environ.get('MQTT_PORT'), auth=auth)
+                       port=int(os.environ.get('MQTT_PORT')), auth=auth)
     except Exception as ex:
         print("MQTT Publish Failed: " + str(ex))
 
@@ -107,6 +107,10 @@ if __name__ == '__main__':
 
     client = docker.from_env()
     rtlamr = client.containers.list(filters={'name': '_rtlamr_'})[0]
+    # rtlamr = client.containers.list(filters={'name': '_rtlamr_'})
+    from pprint import pprint
+    pprint(dir(rtlamr))
+    # pprint(len(rtlamr))
 
     for line in rtlamr.logs(stream=True):
         process(line)
