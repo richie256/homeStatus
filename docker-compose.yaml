@@ -17,7 +17,8 @@ services:
 
 
   ecobee-service:
-    build: ./ecobeeapi
+    # build: ./ecobeeapi
+    image: docker.pkg.github.com/richie256/ecobeeapi/ecobeeapi:1.0
     volumes:
       - ./ecobeeapi:/usr/src/app
     ports:
@@ -51,6 +52,17 @@ services:
   #    # -  
   #  environment:
   #    - CAPTURE_DURATION=10
+
+  chronograf:
+    container_name: chronograf
+    image: chronograf:latest
+    ports:
+      - 8888:8888
+    volumes:
+      - chronograf-data:/var/lib/chronograf
+    depends_on:
+      - influxdb
+    command: chronograf --influxdb-url=http://192.168.68.120:8086
 
   eclipse-mosquitto:
     container_name: eclipse-mosquitto
@@ -87,6 +99,7 @@ services:
       - influx:/var/lib/influxdb
     env_file:
       influxdb-variables.env
+    network_mode: host
     #environment:
     #  INFLUXDB_ADMIN_USER: "FIX_ME"
     #  INFLUXDB_ADMIN_PASSWORD: "FIX_ME"
@@ -110,19 +123,20 @@ services:
 
   # MQTT_USERNAME=mqtt_username MQTT_PASSWORD=mqtt_password MQTT_HOST=mqtt_ip MQTT_PORT=mqtt_port CONFIG=config.yaml PYHQ_OUTPUT=MQTT registry.gitlab.com/ttblt-hass/pyhydroquebec:master
   pyhydroquebec:
-    build: ./pyhydroquebec
-    # image: registry.gitlab.com/ttblt-hass/pyhydroquebec:master
-    volumes:
-      - ./pyhydroquebec_config.yaml:/etc/pyhydroquebec/pyhydroquebec.yaml:ro
-    env_file:
-      pyhydroquebec-variables.env
+    # build: ./pyhydroquebec
+    image: registry.gitlab.com/ttblt-hass/pyhydroquebec:master
+    # volumes:
+    #  - ./pyhydroquebec_config.yaml:/etc/pyhydroquebec/pyhydroquebec.yaml:ro
+    #env_file:
+    #  pyhydroquebec-variables.env
+    command: pyhydroquebec -u dubois.richard@gmail.com -p '!Ipodman256' -l 
 
   grafana:
     image: grafana/grafana
     ports:
       - 0.0.0.0:3000:3000
-    environment:
-      GF_INSTALL_PLUGINS: "natel-discrete-panel,fatcloud-windrose-panel,vonage-status-panel,neocat-cal-heatmap-panel"
+    #environment:
+    #  GF_INSTALL_PLUGINS: "natel-discrete-panel,fatcloud-windrose-panel,vonage-status-panel,neocat-cal-heatmap-panel"
     volumes:
       - grafana:/var/lib/grafana
     depends_on:
@@ -140,6 +154,34 @@ services:
       - eclipse-mosquitto
       - homeassistant
 
+  rtl_tcp:
+    # container_name: rtl_tcp
+    build:
+      context: ./rtlamr
+      dockerfile: Dockerfile.rtl_tcp
+    restart: unless-stopped
+    devices:
+      - /dev/bus/usb
+
+  rtlamr:
+    # container_name: rtlamr
+    build:
+      context: ./rtlamr
+      dockerfile: Dockerfile.rtlamr
+    restart: always
+    depends_on:
+      - rtl_tcp
+
+  rtlamr-mqttexporter:
+    build:
+      context: rtlamr-mqttexporter
+    restart: unless-stopped
+    env_file:
+      mqttexporter-variables.env
+    depends_on:
+      - eclipse-mosquitto
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 volumes:
   influx:
@@ -153,6 +195,8 @@ volumes:
   eclipse-mosquito-log:
     driver: local
   nodered-data:
+    driver: local
+  chronograf-data:
     driver: local
 
 

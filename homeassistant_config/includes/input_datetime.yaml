@@ -1,0 +1,10 @@
+input_datetime:
+  poubelles_start:
+    has_date: true
+    has_time: true
+  recyclage_start:
+    has_date: true
+    has_time: true
+  residus-verts_start:
+    has_date: true
+    has_time: true

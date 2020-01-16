@@ -31,3 +31,28 @@ bellemere_status:
    - "À la maison"
    - "Absente"
   initial: "À la maison"
+
+poubelles_status:
+  name: Poubelles Status
+  options:
+   - "Aujourd'hui"
+   - "Pas aujourd'hui"
+  initial: "Pas aujourd'hui"
+  icon: mdi:trash-can
+
+recyclage_status:
+  name: Recyclage Status
+  options:
+   - "Aujourd'hui"
+   - "Pas aujourd'hui"
+  initial: "Pas aujourd'hui"
+  icon: mdi:recycle
+
+residus-verts_status:
+  name: Résidus Verts Status
+  options:
+   - "Aujourd'hui"
+   - "Pas aujourd'hui"
+  initial: "Pas aujourd'hui"
+  icon: mdi:leaf
+
