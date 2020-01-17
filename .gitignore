@@ -35,3 +35,4 @@ homeassistant_config/known_devices.yaml
 homeassistant_config/.google.token
 mqttexporter-variables.env
 Dockerfile.rtlamr
+homeassistant_config/includes/sensors/sensor.gas.yaml

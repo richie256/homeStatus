@@ -1,0 +1,12 @@
+- platform: mqtt
+  name: gas_total_consumption
+  state_topic: "sensors/gas/99999999/total_consumption"
+
+- platform: mqtt
+  name: gas_reading
+  state_topic: "sensors/gas/99999999/reading"
+
+- platform: mqtt
+  name: gas_date_reading
+  state_topic: "sensors/gas/99999999/date_sensor"
+
