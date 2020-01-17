@@ -37,18 +37,19 @@ def process(current_line):
         return
 
     # Exemple: "Time": "2020-01-13T02:53:46.093844126Z"
+    # Last character is a Z. Nanoseconds isn't always padded with zero.
     nanoseconds = data['Time'].split(".")[1]
-    millisecondstz = nanoseconds[:6] + nanoseconds[9:]
+    millisecondstz = nanoseconds[:6] + nanoseconds[-1:]
     datetimestr = data['Time'].split(".")[0] + '.' + millisecondstz
 
-    dt = datetime.datetime.strptime(datetimestr, '%Y-%m-%dT%H:%M:%S.%f%Z')
+    dt_sensor = datetime.datetime.strptime(datetimestr, '%Y-%m-%dT%H:%M:%S.%fZ')
 
     current_datetime = datetime.datetime.utcnow()
 
-    delta = current_datetime - dt
+    delta = current_datetime - dt_sensor
 
     # We ignore logs more than minute
-    if delta.minutes > 2:
+    if delta > datetime.timedelta(minutes=2):
       return
 
     # get some required info: current meter reading, current interval id, most recent interval usage
@@ -91,6 +92,11 @@ def process(current_line):
                 '%s' % reading_delta
             )
 
+            send_mqtt(
+                'sensors/gas/' + str(endpoint_id) + '/date_sensor',
+                '%s' % dt_sensor.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).isoformat()
+            )
+
         else:
             return
 
@@ -107,7 +113,11 @@ def set_last_interval(endpoint_id, consumption) -> None:
 
 
 def get_delta(endpoint_id, cur_consumption):
-    return cur_consumption - get_last_interval(endpoint_id=endpoint_id)
+    last_interval = get_last_interval(endpoint_id=endpoint_id)
+    if last_interval is None:
+        return 0
+    else:
+        return cur_consumption - get_last_interval(endpoint_id=endpoint_id)
 
 
 # send data to MQTT broker defined in settings
