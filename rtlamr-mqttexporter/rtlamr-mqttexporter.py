@@ -44,9 +44,11 @@ def process(current_line):
 
     try:
         dt_sensor = datetime.datetime.strptime(datetimestr, '%Y-%m-%dT%H:%M:%S.%fZ')
+    # If the date isn't valid, avoid to crash. log the transaction and go the the next
     except Exception as ex:
+        print("Full JSON: " + str(data))
         print("Date conversion for (" + datetimestr + ") :" + str(ex))
-        raise ex
+        return
 
     current_datetime = datetime.datetime.utcnow()
 
