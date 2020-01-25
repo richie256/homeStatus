@@ -42,7 +42,11 @@ def process(current_line):
     millisecondstz = nanoseconds[:6] + nanoseconds[-1:]
     datetimestr = data['Time'].split(".")[0] + '.' + millisecondstz
 
-    dt_sensor = datetime.datetime.strptime(datetimestr, '%Y-%m-%dT%H:%M:%S.%fZ')
+    try:
+        dt_sensor = datetime.datetime.strptime(datetimestr, '%Y-%m-%dT%H:%M:%S.%fZ')
+    except Exception as ex:
+        print("Date conversion for (" + datetimestr + ") :" + str(ex))
+        raise ex
 
     current_datetime = datetime.datetime.utcnow()
 
