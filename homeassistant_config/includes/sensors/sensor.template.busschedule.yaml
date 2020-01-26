@@ -3,8 +3,8 @@
     prochain_arret:
       friendly_name: 'Bus Prochain Arrêt'
       value_template: > 
-        dans {{ states('busschedule_nextstop_nbrmins') }}mins, {{ states('busschedule_nextstop_nbrsecs') }}secs.
+        dans {{ states('sensor.busschedule_nextstop_nbrmins') }}mins, {{ states('sensor.busschedule_nextstop_nbrsecs') }}secs
     bus_numero:
       friendly_name: 'Bus Numéro'
       value_template: > 
-        bus {{ states('busschedule_route_id') }}
+        bus {{ states('sensor.busschedule_route_id') }}
