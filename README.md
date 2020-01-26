@@ -12,11 +12,12 @@
 - [ ] Perform NodeRed backup: $ `docker cp  mynodered:/data  /your/backup/directory`
 - [ ] Create a "Plant Status": https://www.home-assistant.io/lovelace/plant-status/
 - [ ] Ajouter uptime, batterie life , metric 
-- [ ] Ajouter collecte des ordures. https://www.reddit.com/r/homeassistant/comments/blf3wu/put_some_time_into_lovelace_again_tried_to_make/
+- [x] Ajouter collecte des ordures. https://www.reddit.com/r/homeassistant/comments/blf3wu/put_some_time_into_lovelace_again_tried_to_make/
 - [x] Ajouter bignumber-card: https://github.com/custom-cards/bignumber-card
-- [ ] Suivre les instructions: https://community.home-assistant.io/t/lovelace-bignumber-card/59280
+- [x] Suivre les instructions: https://community.home-assistant.io/t/lovelace-bignumber-card/59280
 - [x] Ajouter custom:vertical-style-card: https://github.com/matisaul/vertical-style-card
-- [ ] RTL Bus schedule data scrapping.
+- [x] RTL Bus schedule to MQTT.
+- [ ] Integrate RTL Bus schedule.
 - [ ] Integrate Grafana iFrame: https://community.home-assistant.io/t/best-way-to-get-grafana-chart-into-lovelace-card/128857
 - [ ] Remove the `docker-compose.arm.yaml` file.
 - [ ] Incorporate ecobeeapi and outsidetemp as individual containers.
