@@ -84,8 +84,6 @@ hue:
 sensor: !include_dir_merge_list includes/sensors/
 
 binary_sensor: !include_dir_merge_list includes/binary_sensors/
-# Templates
-template: !include_dir_merge_list includes/templates/
 
 # Text to speech
 tts:
