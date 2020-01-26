@@ -91,7 +91,6 @@ services:
     privileged: true
     depends_on:
       - eclipse-mosquitto
-   
 
   influxdb:
     image: influxdb
@@ -182,6 +181,16 @@ services:
       - eclipse-mosquitto
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  rtl-schedule:
+    container_name: rtl-schedule
+    image: richie256/rtl-schedule
+    env_file:
+      rtlschedule-variables.env
+    depends_on:
+      - eclipse-mosquitto
+
+    
 
 volumes:
   influx:
