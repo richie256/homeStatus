@@ -187,6 +187,8 @@ services:
     image: richie256/rtl-schedule
     env_file:
       rtlschedule-variables.env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       - eclipse-mosquitto
 
