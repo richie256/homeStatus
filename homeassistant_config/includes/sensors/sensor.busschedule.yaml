@@ -1,23 +1,23 @@
 - platform: mqtt
-  name: arrival_time
+  name: busschedule_arrival_time
   state_topic: "schedule/bus_stop/32752/arrival_time"
 
 - platform: mqtt
-  name: current_datetime
+  name: busschedule_current_datetime
   state_topic: "schedule/bus_stop/32752/current_datetime"
 
 - platform: mqtt
-  name: nextstop_nbrmins
+  name: busschedule_nextstop_nbrmins
   state_topic: "schedule/bus_stop/32752/nextstop_nbrmins"
 
 - platform: mqtt
-  name: nextstop_nbrsecs
+  name: busschedule_nextstop_nbrsecs
   state_topic: "schedule/bus_stop/32752/nextstop_nbrsecs"
 
 - platform: mqtt
-  name: route_id
+  name: busschedule_route_id
   state_topic: "schedule/bus_stop/32752/route_id"
 
 - platform: mqtt
-  name: trip_headsign
+  name: busschedule_trip_headsign
   state_topic: "schedule/bus_stop/32752/trip_headsign"
