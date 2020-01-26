@@ -36,3 +36,4 @@ homeassistant_config/.google.token
 mqttexporter-variables.env
 Dockerfile.rtlamr
 homeassistant_config/includes/sensors/sensor.gas.yaml
+rtlschedule-variables.env
