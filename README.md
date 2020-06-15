@@ -65,6 +65,7 @@ total_consumption
 # Inspirations
 - [ ] F1 Qualifications: https://www.reddit.com/r/homeassistant/comments/cerjse/big_thumbs_up_for_the_0960_sleek_sidebar_really/
 - [ ] Environment Canada alerts: https://community.home-assistant.io/t/scrape-sensor-component-get-two-tags/83302
+https://weather.gc.ca/rss/warning/qc-147_f.xml
 
 
 
