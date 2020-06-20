@@ -17,7 +17,7 @@
 - [x] Suivre les instructions: https://community.home-assistant.io/t/lovelace-bignumber-card/59280
 - [x] Ajouter custom:vertical-style-card: https://github.com/matisaul/vertical-style-card
 - [x] RTL Bus schedule to MQTT.
-- [ ] Integrate RTL Bus schedule.
+- [x] Integrate RTL Bus schedule.
 - [ ] Integrate Grafana iFrame: https://community.home-assistant.io/t/best-way-to-get-grafana-chart-into-lovelace-card/128857
 - [ ] Remove the `docker-compose.arm.yaml` file.
 - [ ] Incorporate ecobeeapi and outsidetemp as individual containers.
