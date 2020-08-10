@@ -192,8 +192,6 @@ services:
     depends_on:
       - eclipse-mosquitto
 
-    
-
 volumes:
   influx:
     driver: local
@@ -209,7 +207,4 @@ volumes:
     driver: local
   chronograf-data:
     driver: local
-
-
-
 
