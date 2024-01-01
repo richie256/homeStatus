@@ -2,4 +2,4 @@ Flask==2.3.2
 flask-restful==0.3.6
 python-ecobee-api==0.2.1
 python-dateutil==2.7.2
-redis==3.3.11
+redis==4.4.4
